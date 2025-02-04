@@ -279,6 +279,14 @@ fun LocationInputScreen(
                 .padding(16.dp), // Add padding around the content
             verticalArrangement = Arrangement.Center // Center content vertically
         ) {
+            //testing maps
+            val context = LocalContext.current
+            Button(onClick = {
+                val intent = Intent(context, MapsActivity::class.java)
+                context.startActivity(intent)
+            }) {
+                Text("Open Map")
+            }
             Text(
                 "Enter Latitude and Longitude",
                 style = MaterialTheme.typography.headlineMedium, // Apply headline style

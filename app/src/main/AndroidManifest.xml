@@ -28,6 +28,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- for Google Maps API -->
+        <activity
+            android:name=".MapsActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.KotlinWebCamMapApp"/>
         <!-- per Google Map Tutorial       -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
