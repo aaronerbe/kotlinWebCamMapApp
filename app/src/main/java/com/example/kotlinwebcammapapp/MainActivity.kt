@@ -59,6 +59,14 @@ import androidx.compose.ui.tooling.preview.Preview  //for previewing composables
 import kotlin.coroutines.resume  //resume suspended coroutines
 import kotlin.coroutines.suspendCoroutine  //suspend execution till resumed
 
+// Google Maps Imports
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+
 
 /**
  * MainActivity Class is the entry point of the app.

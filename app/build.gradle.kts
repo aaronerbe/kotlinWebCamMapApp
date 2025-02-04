@@ -3,15 +3,19 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.1.0"
+    // per Google Maps Tutorial
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
     namespace = "com.example.kotlinwebcammapapp"
+    //TODO  Possibly need to make 34 per google tutorial.  leaving as is for now
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.kotlinwebcammapapp"
         minSdk = 24
+        //TODO  Possibly need to make 34 per google tutorial.  leaving as is for now
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -72,4 +76,20 @@ dependencies {
 //    //for logging.  removes console warnings about logging to enable this.
 //    implementation("ch.qos.logback:logback-classic:1.4.12")
 
+    // Per Google Maps Tutorial
+    // Maps SDK for Android
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+}
+
+// Per Google Maps Tutorial
+secrets {
+    // To add your Maps API key to this project:
+    // 1. If the secrets.properties file does not exist, create it in the same folder as the local.properties file.
+    // 2. Add this line, where YOUR_API_KEY is your API key:
+    //        MAPS_API_KEY=YOUR_API_KEY
+    propertiesFileName = "secrets.properties"
+
+    // A properties file containing default secret values. This file can be
+    // checked in version control.
+    defaultPropertiesFileName = "local.defaults.properties"
 }
