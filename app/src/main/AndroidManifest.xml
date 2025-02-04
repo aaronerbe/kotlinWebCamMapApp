@@ -29,15 +29,19 @@
             </intent-filter>
         </activity>
         <!-- for Google Maps API -->
-        <activity
-            android:name=".MapsActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.KotlinWebCamMapApp"/>
+<!--        Moved to screen instead of activity-->
+<!--        <activity-->
+<!--            android:name=".MapsActivity"-->
+<!--            android:exported="true"-->
+<!--            android:label="@string/app_name"-->
+<!--            android:theme="@style/Theme.KotlinWebCamMapApp"/>-->
         <!-- per Google Map Tutorial       -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
+<!--        <meta-data-->
+<!--            android:name="WebCamAPIKey"-->
+<!--            android:value="${WEBCAM_API_KEY}" />-->
     </application>
 
 </manifest>

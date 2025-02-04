@@ -10,14 +10,16 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+// had to add this import to my Main before it would show up here?
+import com.example.kotlinwebcammapapp.BuildConfig
 
 /**
  * Handles API requests for fetching webcam data from the Windy API.
  * Object to handle the WebCam API
  */
 object WebCamAPI {
-    // API key for
-    private const val API_KEY = "hxK1iiN4GCkjymbhFO76k67rzmfQ60M1"
+    // API key for WEBCAMS
+    private val apiKey = BuildConfig.webcamApiKey
 
     // JSON configuration for parsing API responses
     private val json = Json {
@@ -47,7 +49,7 @@ object WebCamAPI {
                 expectSuccess = true
                 headers {
                     append("Content-Type", "application/json")
-                    append("x-windy-api-key", API_KEY)
+                    append("x-windy-api-key", apiKey)
                 }
             }
 
@@ -73,6 +75,7 @@ object WebCamAPI {
      * @return String representing the built URL
      */
     private fun buildBaseURL(lat: Double, lon: Double): String {
-        return "https://api.windy.com/webcams/api/v3/webcams?offset=0&categoryOperation=or&nearby=${lat},${lon},250&include=categories,images,location,player,urls&categories=water,island,beach,harbor,bay,coast,underwater,mountain,park,sportarea"
+        return "https://api.windy.com/webcams/api/v3/webcams?limit=20&offset=0&categoryOperation=or&nearby=${lat},${lon},250&include=categories,images,location,player,urls&categories=city,traffic,forest,mountain,beach,harbor,bay,coast,golf,lake"
+//        return "https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=20&offset=1000&categoryOperation=or&sortKey=popularity&sortDirection=desc&nearby=${lat}%2C${lon}%2C160&categories=city,water,forest,mountain,island,harbor,golf,lake,bay,coast"
     }
 }

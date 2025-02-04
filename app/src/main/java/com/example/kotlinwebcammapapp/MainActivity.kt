@@ -49,7 +49,11 @@ import com.example.kotlinwebcammapapp.ui.theme.KotlinWebCamMapAppTheme
 import androidx.compose.foundation.rememberScrollState // allows scrolling
 import androidx.compose.foundation.verticalScroll  //for vertical scrolling
 import androidx.compose.foundation.background // set background color
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip  // clips ui elements
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign  //align text
 
 // Previewing
@@ -64,8 +68,67 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
+//import com.google.android.gms.maps.model.BitmapDescriptorFactory
+//import com.google.android.gms.maps.model.CameraPosition
+//import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.Polyline
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
+//import android.content.Intent
+//import android.net.Uri
+//import android.os.Bundle
+//import androidx.activity.ComponentActivity
+//import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+//import androidx.compose.ui.Modifier
+//import com.example.kotlinwebcammapapp.ui.theme.KotlinWebCamMapAppTheme
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.CameraPosition
+//import com.google.maps.android.compose.rememberCameraPositionState
+//import com.google.maps.android.compose.GoogleMap
+//import com.google.maps.android.compose.Marker
+//import com.google.maps.android.compose.MarkerState
+//import androidx.compose.ui.graphics.Color
+//import androidx.compose.ui.platform.LocalContext
+//import com.google.maps.android.compose.Polyline
+
+// for floating button:
+//import android.widget.Toast
+//import androidx.compose.foundation.background
+//import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+//import androidx.compose.material.icons.Icons
+//import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+//import androidx.compose.material3.MaterialTheme
+//import androidx.compose.runtime.Composable
+//import androidx.compose.ui.Alignment
+//import androidx.compose.ui.Modifier
+//import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLngBounds
+
+//import com.google.maps.android.compose.rememberMarkerState
+
+import com.example.kotlinwebcammapapp.BuildConfig
 
 
 /**
@@ -198,16 +261,16 @@ fun buildData(lat: Double, lon: Double): WebCams = runBlocking {
 fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
     var currentScreen by remember { mutableStateOf<WebCamState>(WebCamState.LocationInput) }
 
-    // Handle the device back button so it goes back instead of closing app
+    // Handle the device back button
     BackHandler {
         when (currentScreen) {
-            is WebCamState.List -> currentScreen = WebCamState.LocationInput // Back from List to LocationInput
-            is WebCamState.Detail -> currentScreen = WebCamState.List((currentScreen as WebCamState.Detail).webcamList) // Back from Detail to List
-            else -> {} // No action for LocationInput (let the system close the app)
+            is WebCamState.List -> currentScreen = WebCamState.Map((currentScreen as WebCamState.List).webcams)
+            is WebCamState.Detail -> currentScreen = WebCamState.List((currentScreen as WebCamState.Detail).webcamList)
+            is WebCamState.Map -> currentScreen = WebCamState.LocationInput
+            else -> {}
         }
     }
 
-    // Manage the current screen shown based on state
     when (val state = currentScreen) {
         is WebCamState.LocationInput -> {
             LocationInputScreen(
@@ -216,10 +279,19 @@ fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
                     CoroutineScope(Dispatchers.IO).launch {
                         val webCams = buildData(lat, lon)
                         val webcamsList = webCams.getWebcams()
+
                         withContext(Dispatchers.Main) {
-                            currentScreen = WebCamState.List(webcamsList)
+                            currentScreen = WebCamState.Map(webcamsList) // Open Map with webcams
                         }
                     }
+                }
+            )
+        }
+        is WebCamState.Map -> {
+            MapsScreen(
+                webcamList = state.webcams,
+                onListViewClick = { webcamList ->
+                    currentScreen = WebCamState.List(webcamList) // ✅ Pass webcams to List screen
                 }
             )
         }
@@ -227,13 +299,14 @@ fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
             WebCamListScreen(
                 webcams = state.webcams,
                 onWebCamSelected = { id ->
-                    val selectedWebCam = state.webcams.firstOrNull { webcam: WebCam -> webcam.webcamId == id }
+                    val selectedWebCam = state.webcams.firstOrNull { webcam -> webcam.webcamId == id }
                     selectedWebCam?.let {
                         currentScreen = WebCamState.Detail(selectedWebCam, state.webcams)
                     }
                 },
                 onBack = {
-                    currentScreen = WebCamState.LocationInput
+                // currentScreen = WebCamState.LocationInput
+                    currentScreen = WebCamState.Map(state.webcams)
                 }
             )
         }
@@ -280,13 +353,13 @@ fun LocationInputScreen(
             verticalArrangement = Arrangement.Center // Center content vertically
         ) {
             //testing maps
-            val context = LocalContext.current
-            Button(onClick = {
-                val intent = Intent(context, MapsActivity::class.java)
-                context.startActivity(intent)
-            }) {
-                Text("Open Map")
-            }
+//            val context = LocalContext.current
+//            Button(onClick = {
+//                val intent = Intent(context, MapsActivity::class.java)
+//                context.startActivity(intent)
+//            }) {
+//                Text("Open Marina")
+//            }
             Text(
                 "Enter Latitude and Longitude",
                 style = MaterialTheme.typography.headlineMedium, // Apply headline style
@@ -405,6 +478,132 @@ fun LocationInputScreen(
     }
 }
 
+
+@Composable
+fun MapsScreen(webcamList: List<WebCam>, onListViewClick: (List<WebCam>) -> Unit) {
+    val context = LocalContext.current
+
+    val cameraPositionState = rememberCameraPositionState()
+    var selectedWebCam by remember { mutableStateOf<WebCam?>(null) }
+
+    // Initialize bounds builder
+    val boundsBuilder = LatLngBounds.builder()
+
+    // Collect all webcam locations
+    val markers = webcamList.map { webcam ->
+        val position = LatLng(webcam.location.latitude, webcam.location.longitude)
+        boundsBuilder.include(position) // Add each marker to bounds
+        webcam to position // Pair webcam with position for easy access
+    }
+
+    // Adjust camera zoom to fit all markers
+    LaunchedEffect(webcamList) {
+        if (markers.isNotEmpty()) {
+            val bounds = boundsBuilder.build()
+            cameraPositionState.move(CameraUpdateFactory.newLatLngBounds(bounds, 100)) // 100px padding
+        }
+    }
+
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+                onMapClick = { selectedWebCam = null } // Clicking outside closes popup
+            ) {
+                //TODO do this for marina markers too
+                markers.forEach { (webcam, position) ->
+                    Marker(
+                        state = rememberMarkerState(position = position),
+                        title = webcam.title,
+                        snippet = "Click for details",
+//                        icon = BitmapDescriptorFactory.fromResource(R.drawable.web_cam_marker_png),
+                        onClick = {
+                            selectedWebCam = webcam // Show popup
+                            true
+                        }
+                    )
+                }
+            }
+
+            //TODO make selectedMarina?.let....
+
+            // ✅ Show InfoPopup when a marker is selected
+            selectedWebCam?.let { webcam ->
+                WebCamInfoPopup(
+                    webcam = webcam,
+                    onDismiss = { selectedWebCam = null }
+                )
+            }
+
+            // Floating Action Button to switch to List View
+            ExtendedFloatingActionButton(
+                onClick = { onListViewClick(webcamList) },
+                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Open List View") },
+                text = { Text(text = "Open List View") },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun WebCamInfoPopup(webcam: WebCam, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Transparent),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(16.dp)
+                .clickable { onDismiss() }, // Click outside to dismiss
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = webcam.title, style = MaterialTheme.typography.titleSmall)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Views:" + webcam.viewCount.toString(), style = MaterialTheme.typography.bodySmall)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Status:" + webcam.status, style = MaterialTheme.typography.bodySmall)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Clickable Link
+                Text(
+                    text = "Windy URL",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(webcam.urls.detail))
+                        context.startActivity(intent)
+                    }
+                )
+                // Clickable Link
+                Text(
+                    text = "Provider URL",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(webcam.urls.provider))
+                        context.startActivity(intent)
+                    }
+                )
+            }
+        }
+    }
+}
+
+
 /**
  * Webcam List Screen
  * Displays a scrollable list of webcams with a back button.
@@ -442,7 +641,7 @@ fun WebCamListScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text("Back")
+                Text("Back to Map")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -593,6 +792,9 @@ fun WebCamDetailScreen(
 sealed class WebCamState {
     // State for the location input screen
     data object LocationInput : WebCamState()
+
+    // State for WebCamMap screen, input a list of webcams for markers
+    data class Map(val webcams: kotlin.collections.List<WebCam>) : WebCamState()
 
     // State for the list screen, with a list of webcams
     data class List(val webcams: kotlin.collections.List<WebCam>) : WebCamState()
