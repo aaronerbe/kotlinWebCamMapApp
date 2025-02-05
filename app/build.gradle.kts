@@ -82,6 +82,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.maps.android:maps-compose:6.4.1")
 
+    // NavController
+    implementation(libs.androidx.navigation.compose)
 }
 
 // Per Google Maps Tutorial
