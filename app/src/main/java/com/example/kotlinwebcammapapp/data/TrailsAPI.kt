@@ -11,15 +11,15 @@ import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 // had to add this import to my Main before it would show up here?
-//import com.example.kotlinwebcammapapp.BuildConfig
+import com.example.kotlinwebcammapapp.BuildConfig
+import com.example.kotlinwebcammapapp.model.Trail
 
 /**
  * Handles API requests for fetching webcam data from the prescriptiontrails.org API.
  * Object to handle the Trail API
  */
 object TrailsAPI {
-    // no api key needed
-//    private val apiKey = BuildConfig.webcamApiKey
+    private val apiKey = BuildConfig.trailApiKey
 
     // JSON configuration for parsing API responses
     private val json = Json {
@@ -36,7 +36,7 @@ object TrailsAPI {
      */
     suspend fun fetchTrailData(lat: Double, lon: Double): TrailResponse? {
         val url = buildBaseURL(lat, lon)
-        println("DEBUG API URL: $url")
+        println("DEBUG TRAIL API URL: $url")
 
         val client = HttpClient(CIO) {
             install(ContentNegotiation) {
@@ -47,21 +47,24 @@ object TrailsAPI {
         return try {
             val response: HttpResponse = client.get(url) {
                 expectSuccess = true
-//                headers {
-//                    append("Content-Type", "application/json")
-//                    append("x-windy-api-key", apiKey)
-//                }
+                headers {
+                    append("x-rapidapi-host", "trailapi-trailapi.p.rapidapi.com")
+                    append("x-rapidapi-key", apiKey)
+                }
             }
 
             if (response.status.value in 200..299) {
                 val responseBody = response.bodyAsText()
-                json.decodeFromString<TrailResponse>(responseBody)
+                println("DEBUG TRAIL API Response: $responseBody")
+                val trailsMap: Map<String, Trail> = json.decodeFromString(responseBody)
+                TrailResponse(trailsMap)
+//                json.decodeFromString<TrailResponse>(responseBody)
             } else {
-                println("DEBUG API Error: ${response.status}")
+                println("DEBUG TRAIL API Error: ${response.status}")
                 null
             }
         } catch (e: Exception) {
-            println("DEBUG API Exception: ${e.message}")
+            println("DEBUG TRAIL API Exception: ${e.message}")
             null
         } finally {
             client.close()
@@ -75,7 +78,7 @@ object TrailsAPI {
      * @return String representing the built URL
      */
     private fun buildBaseURL(lat: Double, lon: Double): String {
-//        return "https://api.windy.com/webcams/api/v3/webcams?limit=20&offset=0&categoryOperation=or&nearby=${lat},${lon},250&include=categories,images,location,player,urls&categories=city,traffic,forest,mountain,beach,harbor,bay,coast,golf,lake"
-        return "https://prescriptiontrails.org/api/filter/?by=coord&lat=${lat}&lng=${lon}&offset=0&count=20"
+        //limiting to hiking
+        return "https://trailapi-trailapi.p.rapidapi.com/activity/?lat=${lat}&limit=25&lon=${lon}&radius=25&q-activities_activity_type_name_eq=hiking"
     }
 }

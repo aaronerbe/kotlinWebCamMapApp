@@ -20,7 +20,11 @@ import androidx.compose.ui.unit.dp // Dimensions in density-independent pixels (
 // App specific imports
 import com.example.kotlinwebcammapapp.data.WebCams // webcam data retrieval
 import com.example.kotlinwebcammapapp.model.WebCam // defines webcam data model
+import com.example.kotlinwebcammapapp.data.Trails // trail data retrieval
+import com.example.kotlinwebcammapapp.model.Trail // defines trail data model
 import com.example.kotlinwebcammapapp.model.Coordinates // import coordinates class
+
+
 
 
 // Coroutines for async operations
@@ -148,6 +152,7 @@ class MainActivity : ComponentActivity() {
 
         // Apply the theme to the entire app
         setContent {
+            //TODO  Rename??
             KotlinWebCamMapAppTheme {
                 /**
                  * Set the content of the activity to the WebCamApp composable.
@@ -246,11 +251,25 @@ class MainActivity : ComponentActivity() {
  * @param lon Longitude for the request
  * @return WebCams object containing webcam data
  */
-fun buildData(lat: Double, lon: Double): WebCams = runBlocking {
+fun buildWebCamData(lat: Double, lon: Double): WebCams = runBlocking {
     val webCams = WebCams(lat, lon) // Create a WebCams object with the given coordinates
     webCams.init() // Fetch data from the API and initialize the object
     webCams // Return the initialized object
 }
+
+/**
+ * Builds a Trails object using the given latitude and longitude.
+ * This is a blocking operation for simplicity in this learning context.
+ * @param lat Latitude for the request
+ * @param lon Longitude for the request
+ * @return Trail object containing trail data
+ */
+fun buildTrailData(lat: Double, lon: Double): Trails = runBlocking {
+    val trails = Trails(lat, lon) // Create a Trails object with the given coordinates
+    trails.init() // Fetch data from the API and initialize the object
+    trails // Return the initialized object
+}
+
 
 /**
  * Main Composable function for the app.
@@ -259,62 +278,105 @@ fun buildData(lat: Double, lon: Double): WebCams = runBlocking {
  */
 @Composable
 fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
-    var currentScreen by remember { mutableStateOf<WebCamState>(WebCamState.LocationInput) }
+    var currentScreen by remember { mutableStateOf<AppState>(AppState.LocationInput) }
 
-    // Handle the device back button
     BackHandler {
         when (currentScreen) {
-            is WebCamState.List -> currentScreen = WebCamState.Map((currentScreen as WebCamState.List).webcams)
-            is WebCamState.Detail -> currentScreen = WebCamState.List((currentScreen as WebCamState.Detail).webcamList)
-            is WebCamState.Map -> currentScreen = WebCamState.LocationInput
+            is AppState.WebCamList -> currentScreen = AppState.Map(
+                (currentScreen as AppState.WebCamList).webcams,
+                (currentScreen as AppState.WebCamList).trails
+            )
+
+            is AppState.TrailList -> currentScreen = AppState.Map(
+                (currentScreen as AppState.TrailList).webcams,
+                (currentScreen as AppState.TrailList).trails
+            )
+
+            is AppState.Map -> currentScreen = AppState.LocationInput
+
             else -> {}
         }
     }
 
     when (val state = currentScreen) {
-        is WebCamState.LocationInput -> {
+        is AppState.LocationInput -> {
             LocationInputScreen(
                 getCoordinates = getCoordinates,
                 onLocationSubmit = { lat, lon ->
                     CoroutineScope(Dispatchers.IO).launch {
-                        val webCams = buildData(lat, lon)
-                        val webcamsList = webCams.getWebcams()
+                        val webCams = buildWebCamData(lat, lon).getWebcams()
+                        val trails = buildTrailData(lat, lon).getTrails()
 
                         withContext(Dispatchers.Main) {
-                            currentScreen = WebCamState.Map(webcamsList) // Open Map with webcams
+                            currentScreen = AppState.Map(webCams, trails) // Opens map with both lists
                         }
                     }
                 }
             )
         }
-        is WebCamState.Map -> {
+
+        is AppState.Map -> {
             MapsScreen(
                 webcamList = state.webcams,
-                onListViewClick = { webcamList ->
-                    currentScreen = WebCamState.List(webcamList) // ✅ Pass webcams to List screen
+                trailList = state.trails,
+                onWebCamListViewClick = {
+                    currentScreen = AppState.WebCamList(state.webcams, state.trails)
+                },
+                onTrailsListViewClick = {
+                    currentScreen = AppState.TrailList(state.webcams, state.trails)
+                },
+                onTrailSelected = { selectedTrail ->
+                    currentScreen = AppState.TrailDetail(selectedTrail, state.webcams, state.trails)
                 }
             )
         }
-        is WebCamState.List -> {
+
+        is AppState.WebCamList -> {
             WebCamListScreen(
                 webcams = state.webcams,
-                onWebCamSelected = { id ->
-                    val selectedWebCam = state.webcams.firstOrNull { webcam -> webcam.webcamId == id }
+                trails = state.trails,
+                onWebCamSelected = { webcamId ->
+                    val selectedWebCam = state.webcams.firstOrNull { it.webcamId == webcamId }
                     selectedWebCam?.let {
-                        currentScreen = WebCamState.Detail(selectedWebCam, state.webcams)
+                        currentScreen = AppState.WebCamDetail(it, state.webcams, state.trails)
                     }
                 },
                 onBack = {
-                // currentScreen = WebCamState.LocationInput
-                    currentScreen = WebCamState.Map(state.webcams)
+                    currentScreen = AppState.Map(state.webcams, state.trails)
                 }
             )
         }
-        is WebCamState.Detail -> {
+
+        is AppState.TrailList -> {
+            TrailListScreen(
+                trails = state.trails,
+                webcams = state.webcams,
+                onTrailNameSelected = { placeId ->
+                    val selectedTrail = state.trails.firstOrNull { it.placeId == placeId }
+                    selectedTrail?.let {
+                        currentScreen = AppState.TrailDetail(it, state.webcams, state.trails)
+                    }
+                },
+                onBack = {
+                    currentScreen = AppState.Map(state.webcams, state.trails)
+                }
+            )
+        }
+
+        is AppState.WebCamDetail -> {
             WebCamDetailScreen(
                 webcam = state.webcam,
                 onBack = {
-                    currentScreen = WebCamState.List(state.webcamList)
+                    currentScreen = AppState.WebCamList(state.webcamList, state.trailList)
+                }
+            )
+        }
+
+        is AppState.TrailDetail -> {
+            TrailDetailScreen(
+                trail = state.trail,
+                onBack = {
+                    currentScreen = AppState.TrailList(state.webcamList, state.trailList)
                 }
             )
         }
@@ -352,14 +414,6 @@ fun LocationInputScreen(
                 .padding(16.dp), // Add padding around the content
             verticalArrangement = Arrangement.Center // Center content vertically
         ) {
-            //testing maps
-//            val context = LocalContext.current
-//            Button(onClick = {
-//                val intent = Intent(context, MapsActivity::class.java)
-//                context.startActivity(intent)
-//            }) {
-//                Text("Open Marina")
-//            }
             Text(
                 "Enter Latitude and Longitude",
                 style = MaterialTheme.typography.headlineMedium, // Apply headline style
@@ -480,27 +534,35 @@ fun LocationInputScreen(
 
 
 @Composable
-fun MapsScreen(webcamList: List<WebCam>, onListViewClick: (List<WebCam>) -> Unit) {
-    val context = LocalContext.current
-
+fun MapsScreen(
+    webcamList: List<WebCam>,
+    trailList: List<Trail>,
+    onWebCamListViewClick: (List<WebCam>) -> Unit,
+    onTrailsListViewClick: (List<Trail>) -> Unit,
+    onTrailSelected: (Trail) -> Unit
+) {
     val cameraPositionState = rememberCameraPositionState()
     var selectedWebCam by remember { mutableStateOf<WebCam?>(null) }
+    var selectedTrail by remember { mutableStateOf<Trail?>(null) }
 
-    // Initialize bounds builder
     val boundsBuilder = LatLngBounds.builder()
 
-    // Collect all webcam locations
-    val markers = webcamList.map { webcam ->
+    val webCamMarkers = webcamList.map { webcam ->
         val position = LatLng(webcam.location.latitude, webcam.location.longitude)
-        boundsBuilder.include(position) // Add each marker to bounds
-        webcam to position // Pair webcam with position for easy access
+        boundsBuilder.include(position)
+        webcam to position
     }
 
-    // Adjust camera zoom to fit all markers
+    val trailMarkers = trailList.map { trail ->
+        val position = LatLng(trail.lat, trail.lon)
+        boundsBuilder.include(position)
+        trail to position
+    }
+
     LaunchedEffect(webcamList) {
-        if (markers.isNotEmpty()) {
+        if (webCamMarkers.isNotEmpty()) {
             val bounds = boundsBuilder.build()
-            cameraPositionState.move(CameraUpdateFactory.newLatLngBounds(bounds, 100)) // 100px padding
+            cameraPositionState.move(CameraUpdateFactory.newLatLngBounds(bounds, 100))
         }
     }
 
@@ -509,27 +571,41 @@ fun MapsScreen(webcamList: List<WebCam>, onListViewClick: (List<WebCam>) -> Unit
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
-                onMapClick = { selectedWebCam = null } // Clicking outside closes popup
+                onMapClick = {
+                    selectedWebCam = null
+                    selectedTrail = null
+                }
             ) {
-                //TODO do this for marina markers too
-                markers.forEach { (webcam, position) ->
+                webCamMarkers.forEach { (webcam, position) ->
                     Marker(
                         state = rememberMarkerState(position = position),
                         title = webcam.title,
                         snippet = "Click for details",
-//                        icon = BitmapDescriptorFactory.fromResource(R.drawable.web_cam_marker_png),
-                        icon=BitmapDescriptorFactory.fromResource(R.drawable.webcam_marker5),
+                        icon = BitmapDescriptorFactory.fromResource(R.drawable.webcam_marker5),
                         onClick = {
-                            selectedWebCam = webcam // Show popup
+                            selectedWebCam = webcam
+                            selectedTrail = null // Deselect any trail if a webcam is selected
+                            true
+                        }
+                    )
+                }
+
+                trailMarkers.forEach { (trail, position) ->
+                    Marker(
+                        state = rememberMarkerState(position = position),
+                        title = trail.name,
+                        snippet = "Click for details",
+                        icon = BitmapDescriptorFactory.fromResource(R.drawable.webcam_marker3),
+                        onClick = {
+                            selectedTrail = trail
+                            selectedWebCam = null // Deselect any webcam if a trail is selected
                             true
                         }
                     )
                 }
             }
 
-            //TODO make selectedMarina?.let....
-
-            // Show InfoPopup when a marker is selected
+            // Show WebCamInfoPopup when a webcam is selected
             selectedWebCam?.let { webcam ->
                 WebCamInfoPopup(
                     webcam = webcam,
@@ -537,20 +613,45 @@ fun MapsScreen(webcamList: List<WebCam>, onListViewClick: (List<WebCam>) -> Unit
                 )
             }
 
-            // Floating Action Button to switch to List View
-            ExtendedFloatingActionButton(
-                onClick = { onListViewClick(webcamList) },
-                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Open List View") },
-                text = { Text(text = "Open List View") },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+            // Show TrailInfoPopup when a trail is selected
+            selectedTrail?.let { trail ->
+                TrailInfoPopup(
+                    trail = trail,
+                    onDismiss = { selectedTrail = null },
+                    onTrailNameSelected = { placeId ->
+                        val selectedTrailDetail = trailList.firstOrNull { it.placeId == placeId }
+                        selectedTrailDetail?.let { onTrailSelected(it) }
+                    }
+                )
+            }
+
+            // Floating Action Buttons
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-            )
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = { onWebCamListViewClick(webcamList) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Open WebCam List View") },
+                    text = { Text("WebCam List") },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+
+                ExtendedFloatingActionButton(
+                    onClick = { onTrailsListViewClick(trailList) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Open Trails List View") },
+                    text = { Text("Trails List") },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun WebCamInfoPopup(webcam: WebCam, onDismiss: () -> Unit) {
@@ -604,6 +705,49 @@ fun WebCamInfoPopup(webcam: WebCam, onDismiss: () -> Unit) {
     }
 }
 
+@Composable
+fun TrailInfoPopup(
+    trail: Trail,
+    onDismiss: () -> Unit,
+    onTrailNameSelected: (Long) -> Unit // Ensure this is correctly passed from the parent
+) {
+    val context = LocalContext.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Transparent)
+            .clickable { onDismiss() }, // Dismiss when clicking outside
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(16.dp),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                // Make the name clickable to navigate to details
+                Text(
+                    text = "Trail Name: ${trail.name}",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.clickable {
+                        println("DEBUG: Trail clicked: ${trail.name} (ID: ${trail.placeId})")
+                        onTrailNameSelected(trail.placeId) // Trigger state change
+                    }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Trail Description: ${trail.description}", style = MaterialTheme.typography.bodySmall)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Directions: ${trail.directions}", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+}
+
+
 
 /**
  * Webcam List Screen
@@ -614,9 +758,10 @@ fun WebCamInfoPopup(webcam: WebCam, onDismiss: () -> Unit) {
  */
 @Composable
 fun WebCamListScreen(
-    webcams: List<WebCam>, // List of webcams to display
-    onWebCamSelected: (Long) -> Unit, // Function to handle when a webcam is selected
-    onBack: () -> Unit // Function to handle back navigation
+    webcams: List<WebCam>,
+    trails: List<Trail>, // Add trails to be passed back to map when going back
+    onWebCamSelected: (Long) -> Unit,
+    onBack: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -680,6 +825,77 @@ fun WebCamListScreen(
         }
     }
 }
+
+@Composable
+fun TrailListScreen(
+    trails: List<Trail>,
+    webcams: List<WebCam>, // Add webcams to be passed back to map when going back
+    onTrailNameSelected: (Long) -> Unit = {},
+    onBack: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Spacer(modifier = Modifier.height(62.dp))
+
+            // Title for the screen
+            Text(
+                "Available Trails",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+
+            // Back button
+            Button(
+                onClick = onBack,
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text("Back to Map")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Scrollable list of trails
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                trails.forEach { trail ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.surface)
+                            .clickable { onTrailNameSelected(trail.placeId) }
+                            .padding(16.dp)
+                    ) {
+                        Column {
+                            Text(
+                                trail.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                "Description: ${trail.description}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 /**
  * WebCam Detail Screen
@@ -788,24 +1004,156 @@ fun WebCamDetailScreen(
 }
 
 /**
+ * Trail Detail Screen
+ * Displays detailed information about a selected trail, including title, location, and URLs.
+ * Provides navigation back to the list screen.
+ * @param trail Selected webcam to display
+ * @param onBack Function to handle back navigation
+ */
+@Composable
+fun TrailDetailScreen(
+    trail: Trail, // Webcam details to display
+    onBack: () -> Unit // Function to handle back navigation
+) {
+    val context = LocalContext.current // Provides access to the current context
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        // Layout container for the detail view
+        Column(
+            modifier = Modifier
+                .fillMaxSize() // Fill the available screen space
+                .padding(16.dp) // Add padding around the content
+        ) {
+            // Add spacing before the title
+            Spacer(modifier = Modifier.height(62.dp))
+
+            // Title for the screen
+            Text(
+                "Trail Details",
+                style = MaterialTheme.typography.headlineMedium, // Apply headline style
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+
+            // Add spacing between title and details
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display webcam details (title, location)
+            Text(
+                text = "Title: ${trail.name}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground // Use appropriate contrast color
+            )
+            Text(
+                text = "Location: ${trail.city}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = "Description: ${trail.description}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = "Directions: ${trail.directions}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            // Add spacing between details and URLs
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Button to open the Windy URL
+            Button(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(trail.activities["hiking"]?.url))
+                    context.startActivity(intent) // Open the URL in a browser
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium, // Apply consistent rounded corners
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary, // Use secondary color for this button
+                    contentColor = MaterialTheme.colorScheme.onSecondary // Use contrast color
+                )
+            ) {
+                Text("Trail URL")
+            }
+
+            // Add spacing between buttons
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Button to open the provider URL
+            Button(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(trail.activities["hiking"]?.url))
+                    context.startActivity(intent) // Open the URL in a browser
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            ) {
+                Text("Trail URL")
+            }
+
+            // Add spacing between URL buttons and the back button
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Back button to navigate back to the list screen
+            Button(
+                onClick = onBack,
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium, // Consistent rounded corners for the back button
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary, // Use primary color for the back button
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text("Back to List") // Label for the back button
+            }
+        }
+    }
+}
+
+/**
  * Sealed class representing different states/screens of the app.
  */
-sealed class WebCamState {
-    // State for the location input screen
-    data object LocationInput : WebCamState()
+sealed class AppState {
+    data object LocationInput : AppState()
 
-    // State for WebCamMap screen, input a list of webcams for markers
-    data class Map(val webcams: kotlin.collections.List<WebCam>) : WebCamState()
+    data class Map(
+        val webcams: List<WebCam>,
+        val trails: List<Trail>
+    ) : AppState()
 
-    // State for the list screen, with a list of webcams
-    data class List(val webcams: kotlin.collections.List<WebCam>) : WebCamState()
+    data class WebCamList(
+        val webcams: List<WebCam>,
+        val trails: List<Trail>
+    ) : AppState()
 
-    // State for the detail screen, with a selected webcam and the full list of webcams
-    data class Detail(
-        val webcam: WebCam, // Selected webcam
-        val webcamList: kotlin.collections.List<WebCam> = emptyList() // Default to an empty list
-    ) : WebCamState()
+    data class TrailList(
+        val webcams: List<WebCam>,
+        val trails: List<Trail>
+    ) : AppState()
+
+    data class WebCamDetail(
+        val webcam: WebCam,
+        val webcamList: List<WebCam>,  //  Fix name to match expected references
+        val trailList: List<Trail>     //  Fix name to match expected references
+    ) : AppState()
+
+    data class TrailDetail(
+        val trail: Trail,
+        val webcamList: List<WebCam>,  //  Fix name to match expected references
+        val trailList: List<Trail>     //  Fix name to match expected references
+    ) : AppState()
+
 }
+
 
 /**
  * Preview for the Location Input Screen
