@@ -518,6 +518,7 @@ fun MapsScreen(webcamList: List<WebCam>, onListViewClick: (List<WebCam>) -> Unit
                         title = webcam.title,
                         snippet = "Click for details",
 //                        icon = BitmapDescriptorFactory.fromResource(R.drawable.web_cam_marker_png),
+                        icon=BitmapDescriptorFactory.fromResource(R.drawable.webcam_marker5),
                         onClick = {
                             selectedWebCam = webcam // Show popup
                             true
@@ -528,7 +529,7 @@ fun MapsScreen(webcamList: List<WebCam>, onListViewClick: (List<WebCam>) -> Unit
 
             //TODO make selectedMarina?.let....
 
-            // ✅ Show InfoPopup when a marker is selected
+            // Show InfoPopup when a marker is selected
             selectedWebCam?.let { webcam ->
                 WebCamInfoPopup(
                     webcam = webcam,
