@@ -75,10 +75,14 @@ object TrailsAPI {
      * Builds the API URL based on given latitude and longitude.
      * @param lat Latitude for the request
      * @param lon Longitude for the request
+     * @param activity Type of activity to filter trails by
      * @return String representing the built URL
      */
-    private fun buildBaseURL(lat: Double, lon: Double): String {
+    private fun buildBaseURL(lat: Double, lon: Double, activity: String = "hiking"): String {
         //limiting to hiking
-        return "https://trailapi-trailapi.p.rapidapi.com/activity/?lat=${lat}&limit=25&lon=${lon}&radius=25&q-activities_activity_type_name_eq=hiking"
+        return "https://trailapi-trailapi.p.rapidapi.com/activity/?lat=${lat}&limit=40&lon=${lon}&radius=50"
     }
 }
+
+
+//    return "https://trailapi-trailapi.p.rapidapi.com/activity/?lat=${lat}&limit=25&lon=${lon}&radius=25&q-activities_activity_type_name_eq=${activity}"

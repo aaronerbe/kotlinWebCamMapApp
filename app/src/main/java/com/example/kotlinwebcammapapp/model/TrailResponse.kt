@@ -2,6 +2,7 @@ package com.example.kotlinwebcammapapp.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class TrailResponse(
@@ -34,7 +35,7 @@ data class Activity(
     val thumbnail: String,
     @SerialName("activity_type") val activityType: String,
     @SerialName("activity_type_name") val activityTypeName: String,
-    val attribs: Attributes,
+    @Transient val attribs: Attributes = Attributes(""),    // Transient means it won't be serialized
     @SerialName("place_activity_id") val placeActivityId: String
 )
 

@@ -37,6 +37,7 @@ fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
             getCoordinates = getCoordinates,
             onLocationSubmit = { lat, lon ->
                 CoroutineScope(Dispatchers.IO).launch {
+                    // buildWebCamData returns WebCams object which has a getter method .getWebCams
                     val webCams = buildWebCamData(lat, lon).getWebcams()
                     val trails = buildTrailData(lat, lon).getTrails()
 

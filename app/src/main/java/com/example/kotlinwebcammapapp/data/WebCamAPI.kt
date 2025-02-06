@@ -75,7 +75,7 @@ object WebCamAPI {
      * @return String representing the built URL
      */
     private fun buildBaseURL(lat: Double, lon: Double): String {
-        return "https://api.windy.com/webcams/api/v3/webcams?limit=20&offset=0&categoryOperation=or&nearby=${lat},${lon},250&include=categories,images,location,player,urls&categories=city,traffic,forest,mountain,beach,harbor,bay,coast,golf,lake"
+        return "https://api.windy.com/webcams/api/v3/webcams?limit=25&offset=0&categoryOperation=or&nearby=${lat},${lon},80&include=categories,images,location,player,urls&categories=city,forest,mountain,beach,harbor,bay,coast,golf,lake"
 //        return "https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=20&offset=1000&categoryOperation=or&sortKey=popularity&sortDirection=desc&nearby=${lat}%2C${lon}%2C160&categories=city,water,forest,mountain,island,harbor,golf,lake,bay,coast"
     }
 }
