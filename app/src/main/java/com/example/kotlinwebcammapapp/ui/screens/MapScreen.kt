@@ -50,6 +50,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import com.example.kotlinwebcammapapp.ui.components.MultiChoiceSegmentedButton
 
 
 @Composable
@@ -74,23 +75,23 @@ fun MapsScreen(
     var showSnowSports by remember {mutableStateOf(true)}
     var showATV by remember {mutableStateOf(true)}
     var showHorsebackRiding by remember {mutableStateOf(true)}
-
-
-
     val boundsBuilder = LatLngBounds.builder()
-
     val webCamMarkers = webcamList.map { webcam ->
         val position = LatLng(webcam.location.latitude, webcam.location.longitude)
         boundsBuilder.include(position)
         webcam to position
     }
-
     val trailMarkers = trailList.map { trail ->
         val position = LatLng(trail.lat, trail.lon)
         boundsBuilder.include(position)
         trail to position
     }
 
+    //todo testing filters:
+
+    // filter options.  if it's in this list, it will be displayed.  the multichoicesegemented button is used to toggle these in/out of the list.
+//    var selectedOptions by remember { mutableStateOf(listOf("hiking", "camping", "caving", "mountain biking", "trail running", "snow sports", "atv", "horseback riding"))}
+    var selectedOptions by remember { mutableStateOf(listOf("hiking", "camping", "caving", "mountain biking", "snow sports" ))}
     //todo, look at changing to bound based off trails.  or both?
     LaunchedEffect(webcamList) {
         if (webCamMarkers.isNotEmpty()) {
@@ -125,17 +126,12 @@ fun MapsScreen(
 
                 trailMarkers.forEach { (trail, position) ->
                     val activity = trail.activities.values.firstOrNull()?.activityTypeName
-                    var visible  = true
-                    when (activity) {
-                        "hiking" -> visible = showHiking
-                        "camping" -> visible = showCamping
-                        "mountain biking" -> visible = showMountainBiking
-                        "caving" -> visible = showCaving
-                        "trail running" -> visible = showTrailRunning
-                        "snow sports" -> visible = showSnowSports
-                        "atv" -> visible = showATV
-                        "horseback riding" -> visible = showHorsebackRiding
-                    }
+                    // was val shouldShow = activity in selectedOptions but needed to lowercase it to account for variations
+                    val shouldShow = activity?.lowercase() in selectedOptions.map { it.lowercase() }
+
+                    println("DEBUG FILTER: $selectedOptions $activity $shouldShow")
+
+                    //sets the icon that this marker will used based on the activity of the marker
                     val iconResourceId = when(activity){
                         "hiking" -> R.drawable.hiking
                         "camping" -> R.drawable.camping
@@ -147,18 +143,15 @@ fun MapsScreen(
                         "horseback riding" -> R.drawable.horseback
                         else -> R.drawable.default_marker
                     }
-                    // TODO trying to control visibility based on toggles
-                    if (visible) {
+                    if (shouldShow) {
                         Marker(
-
                             state = rememberMarkerState(position = position),
                             title = trail.name,
                             snippet = "Click for details",
                             icon = BitmapDescriptorFactory.fromResource(iconResourceId),
-                            //                        icon = BitmapDescriptorFactory.fromResource(R.drawable.camping),
                             onClick = {
                                 selectedTrail = trail
-                                selectedWebCam = null // Deselect any webcam if a trail is selected
+                                selectedWebCam = null
                                 true
                             }
                         )
@@ -185,126 +178,6 @@ fun MapsScreen(
                     }
                 )
             }
-            Column(
-                modifier = Modifier
-//                    .align(Alignment.CenterStart)
-                    .align(Alignment.TopStart)
-                    .padding(top=32.dp, start=4.dp, end=4.dp, bottom = 4.dp)
-//                    .padding(4.dp)
-                    .border(1.dp, Color.Gray, shape=RoundedCornerShape(12.dp))
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(12.dp))
-                    .padding(6.dp),
-                verticalArrangement = Arrangement.spacedBy((-12).dp) // Remove extra spacing
-            ) {
-                val switchModifier = Modifier.scale(0.7f) // Consistent scaling
-                val iconSize = 24.dp // Consistent icon size
-
-                Row(modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = showHiking,
-                        onCheckedChange = { showHiking = it },
-                        modifier = switchModifier
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.hiking),
-                        contentDescription = "Hiking",
-                        modifier = Modifier.padding(start = 4.dp).size(iconSize) // Add a small gap
-                    )
-                }
-                Row(modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = showCamping,
-                        onCheckedChange = { showCamping = it },
-                        modifier = switchModifier
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.camping),
-                        contentDescription = "Camping",
-                        modifier = Modifier.padding(start = 4.dp).size(iconSize)
-                    )
-                }
-                Row(modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = showMountainBiking,
-                        onCheckedChange = { showMountainBiking = it },
-                        modifier = switchModifier
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.mountain_biking),
-                        contentDescription = "Mountain Biking",
-                        modifier = Modifier.padding(start = 4.dp).size(iconSize)
-                    )
-                }
-                Row(modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = showCaving,
-                        onCheckedChange = { showCaving = it },
-                        modifier = switchModifier
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.caving),
-                        contentDescription = "Caving",
-                        modifier = Modifier.padding(start = 4.dp).size(iconSize)
-                    )
-                }
-                Row(modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = showTrailRunning,
-                        onCheckedChange = { showTrailRunning = it },
-                        modifier = switchModifier
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.trail_running),
-                        contentDescription = "Trail Running",
-                        modifier = Modifier.padding(start = 4.dp).size(iconSize)
-                    )
-                }
-                Row(modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = showSnowSports,
-                        onCheckedChange = { showSnowSports = it },
-                        modifier = switchModifier
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.snow_sports),
-                        contentDescription = "Snow Sports",
-                        modifier = Modifier.padding(start = 4.dp).size(iconSize)
-                    )
-                }
-                Row(modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = showATV,
-                        onCheckedChange = { showATV = it },
-                        modifier = switchModifier
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.atv),
-                        contentDescription = "ATV",
-                        modifier = Modifier.padding(start = 4.dp).size(iconSize)
-                    )
-                }
-                Row(modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = showHorsebackRiding,
-                        onCheckedChange = { showHorsebackRiding = it },
-                        modifier = switchModifier
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.horseback),
-                        contentDescription = "Horseback Riding",
-                        modifier = Modifier.padding(start = 4.dp).size(iconSize)
-                    )
-                }
-            }
 
 
             // Floating Action Buttons
@@ -314,6 +187,17 @@ fun MapsScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                MultiChoiceSegmentedButton(
+                    selectedFilters = selectedOptions,
+                    onFilterChange = { filter ->
+                        selectedOptions = if (filter in selectedOptions) {
+                            selectedOptions - filter // Remove if already selected
+                        } else {
+                            selectedOptions + filter // Add if not selected
+                        }
+                    },
+                    modifier = Modifier.width(150.dp),
+                )
                 ExtendedFloatingActionButton(
                     modifier = Modifier.width(150.dp), // Set a fixed width (adjust as needed)
                     onClick = { onWebCamListViewClick(webcamList) },
