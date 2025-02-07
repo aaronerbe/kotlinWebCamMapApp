@@ -52,12 +52,12 @@ fun MultiChoiceSegmentedButton(
                 label = {
                     when (label) {
                         "hiking" -> Image(
-                            painter = painterResource(id = R.drawable.hiking),
+                            painter = painterResource(id = R.drawable.hiking_white),
                             contentDescription = "Hiking",
                             modifier = Modifier.size(iconSize)
                         )
                         "camping" -> Image(
-                            painter = painterResource(id = R.drawable.camping),
+                            painter = painterResource(id = R.drawable.camping_white),
                             contentDescription = "Camping",
                             modifier = Modifier.size(iconSize)
                         )
@@ -67,7 +67,7 @@ fun MultiChoiceSegmentedButton(
                             modifier = Modifier.size(iconSize)
                         )
                         "mountain biking" -> Image(
-                            painter = painterResource(id = R.drawable.mountain_biking),
+                            painter = painterResource(id = R.drawable.mountain_biking_white),
                             contentDescription = "Mountain Biking",
                             modifier = Modifier.size(iconSize)
                         )
@@ -77,7 +77,7 @@ fun MultiChoiceSegmentedButton(
                             modifier = Modifier.size(iconSize)
                         )
                         "snow sports" -> Image(
-                            painter = painterResource(id = R.drawable.snow_sports),
+                            painter = painterResource(id = R.drawable.snow_sports_white),
                             contentDescription = "Snow Sports",
                             modifier = Modifier.size(iconSize)
                         )
@@ -92,7 +92,7 @@ fun MultiChoiceSegmentedButton(
                             modifier = Modifier.size(iconSize)
                         )
                         "webcam" -> Image(
-                            painter = painterResource(id = R.drawable.webcam_marker),
+                            painter = painterResource(id = R.drawable.webcam_marker_white),
                             contentDescription = "WebCams",
                             modifier = Modifier.size(iconSize)
                         )

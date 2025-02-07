@@ -192,7 +192,7 @@ fun MapsScreen(
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.webcam),
+                            painter = painterResource(id = R.drawable.webcam_white),
                             contentDescription = "Opens Webcams List",
                             modifier = Modifier.size(24.dp)
                         )
@@ -203,7 +203,7 @@ fun MapsScreen(
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.trail),
+                            painter = painterResource(id = R.drawable.trail_white),
                             contentDescription = "Opens Trails List",
                             modifier = Modifier.size(24.dp)
                         )
