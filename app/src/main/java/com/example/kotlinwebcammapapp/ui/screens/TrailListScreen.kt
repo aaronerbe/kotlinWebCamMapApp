@@ -20,12 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.kotlinwebcammapapp.model.Trail
-import com.example.kotlinwebcammapapp.model.WebCam
 
 @Composable
 fun TrailListScreen(
     trails: List<Trail>,
-    webcams: List<WebCam>, // Add webcams to be passed back to map when going back
     onTrailNameSelected: (Long) -> Unit = {},
     onBack: () -> Unit
 ) {

@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.example.kotlinwebcammapapp.model.Trail
 import com.example.kotlinwebcammapapp.model.WebCam
 
 /**
@@ -32,7 +31,7 @@ import com.example.kotlinwebcammapapp.model.WebCam
 @Composable
 fun WebCamListScreen(
     webcams: List<WebCam>,
-    trails: List<Trail>, // Add trails to be passed back to map when going back
+//    trails: List<Trail>, // Add trails to be passed back to map when going back
     onWebCamSelected: (Long) -> Unit,
     onBack: () -> Unit
 ) {

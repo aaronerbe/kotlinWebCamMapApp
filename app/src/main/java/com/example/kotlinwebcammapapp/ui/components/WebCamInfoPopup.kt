@@ -15,8 +15,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.kotlinwebcammapapp.R
 import com.example.kotlinwebcammapapp.model.WebCam
-import androidx.compose.foundation.Image
-import androidx.compose.ui.graphics.asImageBitmap
 import coil3.compose.AsyncImage
 
 

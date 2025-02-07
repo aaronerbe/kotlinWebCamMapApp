@@ -19,7 +19,7 @@ import com.example.kotlinwebcammapapp.model.Trail
  * Object to handle the Trail API
  */
 object TrailsAPI {
-    private val apiKey = BuildConfig.trailApiKey
+    private const val APIKEY = BuildConfig.trailApiKey
 
     // JSON configuration for parsing API responses
     private val json = Json {
@@ -49,7 +49,7 @@ object TrailsAPI {
                 expectSuccess = true
                 headers {
                     append("x-rapidapi-host", "trailapi-trailapi.p.rapidapi.com")
-                    append("x-rapidapi-key", apiKey)
+                    append("x-rapidapi-key", APIKEY)
                 }
             }
 
@@ -75,10 +75,9 @@ object TrailsAPI {
      * Builds the API URL based on given latitude and longitude.
      * @param lat Latitude for the request
      * @param lon Longitude for the request
-     * @param activity Type of activity to filter trails by
      * @return String representing the built URL
      */
-    private fun buildBaseURL(lat: Double, lon: Double, activity: String = "hiking"): String {
+    private fun buildBaseURL(lat: Double, lon: Double): String {
         //limiting to hiking
         return "https://trailapi-trailapi.p.rapidapi.com/activity/?lat=${lat}&limit=40&lon=${lon}&radius=50"
     }

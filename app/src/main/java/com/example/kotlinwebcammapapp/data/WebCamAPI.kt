@@ -19,7 +19,7 @@ import com.example.kotlinwebcammapapp.BuildConfig
  */
 object WebCamAPI {
     // API key for WEBCAMS
-    private val apiKey = BuildConfig.webcamApiKey
+    private const val APIKEY = BuildConfig.webcamApiKey
 
     // JSON configuration for parsing API responses
     private val json = Json {
@@ -49,7 +49,7 @@ object WebCamAPI {
                 expectSuccess = true
                 headers {
                     append("Content-Type", "application/json")
-                    append("x-windy-api-key", apiKey)
+                    append("x-windy-api-key", APIKEY)
                 }
             }
 

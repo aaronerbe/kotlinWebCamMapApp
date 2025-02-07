@@ -52,11 +52,11 @@ fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
             trailList = state.trails,
             onWebCamListViewClick = { currentScreen = AppState.WebCamList(state.webcams, state.trails) },
             onTrailsListViewClick = { currentScreen = AppState.TrailList(state.webcams, state.trails) },
-            onTrailSelected = { selectedTrail -> currentScreen = AppState.TrailDetail(selectedTrail, state.webcams, state.trails) }
+//            onTrailSelected = { selectedTrail -> currentScreen = AppState.TrailDetail(selectedTrail, state.webcams, state.trails) }
         )
         is AppState.WebCamList -> WebCamListScreen(
             webcams = state.webcams,
-            trails = state.trails,
+//            trails = state.trails,
             onWebCamSelected = { webcamId ->
                 state.webcams.firstOrNull { it.webcamId == webcamId }?.let {
                     currentScreen = AppState.WebCamDetail(it, state.webcams, state.trails)
@@ -66,7 +66,7 @@ fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
         )
         is AppState.TrailList -> TrailListScreen(
             trails = state.trails,
-            webcams = state.webcams,
+//            webcams = state.webcams,
             onTrailNameSelected = { placeId ->
                 state.trails.firstOrNull { it.placeId == placeId }?.let {
                     currentScreen = AppState.TrailDetail(it, state.webcams, state.trails)

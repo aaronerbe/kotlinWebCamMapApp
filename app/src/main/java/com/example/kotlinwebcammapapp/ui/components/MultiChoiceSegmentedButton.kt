@@ -12,17 +12,16 @@ import com.example.kotlinwebcammapapp.R
 /**
  * A segmented button that allows the user to select multiple options.
  * selected filters are passed in as a list of strings to determine which icons to display
- * onfilterchange is used to update the list of selected filters.  the string in it is the filter that will toggle
+ * onFilterChange is used to update the list of selected filters.  the string in it is the filter that will toggle
  * @param selectedFilters The list of selected filters.
  * @param onFilterChange The callback that is called when a filter is changed.
- * @param modifier The modifier to be applied to the layout.
  * @return A [Row] layout that displays the segmented buttons.
  */
 @Composable
 fun MultiChoiceSegmentedButton(
     selectedFilters: List<String>,
     onFilterChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+//    modifier: Modifier = Modifier
 ) {
     // options is used in the when statement below to determine which icon to display
 

@@ -55,8 +55,8 @@ class MainActivity : ComponentActivity() {
 
     /**
      * Function for handling getting user coordinates
-     * Handles checking permissions, calling launcher if needed and getting coords
-     * Note:  suspend needed since it's an async call to get the coords.  Needed to avoid returning null before it was done actaully getting the coords
+     * Handles checking permissions, calling launcher if needed and getting coordinates
+     * Note:  suspend needed since it's an async call to get the coordinates.  Needed to avoid returning null before it was done actually getting the coordinates
      * Also, this function is unnecessary.  Could just go straight to fetchUserLocation().  May clean this up in next sprint.
      * @return CheckLocationPermissions() -> Coordinates?
      */

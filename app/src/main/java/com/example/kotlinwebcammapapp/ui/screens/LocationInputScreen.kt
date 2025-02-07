@@ -56,13 +56,13 @@ fun LocationInputScreen(
             Button(
                 onClick = {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val coords = getCoordinates() // Suspend function call
+                        val coordinates = getCoordinates() // Suspend function call
                         withContext(Dispatchers.Main) {
-                            if (coords != null) {
-                                lat = coords.latitude.toString()
-                                lon = coords.longitude.toString()
+                            if (coordinates != null) {
+                                lat = coordinates.latitude.toString()
+                                lon = coordinates.longitude.toString()
                                 println("DEBUG LOCATION INPUT: $lat, $lon")
-                                onLocationSubmit(coords.latitude, coords.longitude)
+                                onLocationSubmit(coordinates.latitude, coordinates.longitude)
                             } else {
                                 println("DEBUG LOCATION INPUT: Coordinates are null or permissions denied.")
                             }
