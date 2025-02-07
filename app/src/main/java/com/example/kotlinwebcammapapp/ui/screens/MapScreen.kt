@@ -47,9 +47,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import com.example.kotlinwebcammapapp.ui.components.CardMinimalExample
 import com.example.kotlinwebcammapapp.ui.components.MultiChoiceSegmentedButton
 
 
@@ -67,14 +70,6 @@ fun MapsScreen(
 
     // TODO for toggle filters
     //For toggling visibility of trails markers by activity
-    var showHiking by remember {mutableStateOf(true)}
-    var showCamping by remember {mutableStateOf(true)}
-    var showMountainBiking by remember {mutableStateOf(true)}
-    var showCaving by remember {mutableStateOf(true)}
-    var showTrailRunning by remember {mutableStateOf(true)}
-    var showSnowSports by remember {mutableStateOf(true)}
-    var showATV by remember {mutableStateOf(true)}
-    var showHorsebackRiding by remember {mutableStateOf(true)}
     val boundsBuilder = LatLngBounds.builder()
     val webCamMarkers = webcamList.map { webcam ->
         val position = LatLng(webcam.location.latitude, webcam.location.longitude)
@@ -89,9 +84,9 @@ fun MapsScreen(
 
     //todo testing filters:
 
-    // filter options.  if it's in this list, it will be displayed.  the multichoicesegemented button is used to toggle these in/out of the list.
+    // filter options.  if it's in this list, it will be displayed.  the multiChoiceSegmentedButton is used to toggle these in/out of the list.
 //    var selectedOptions by remember { mutableStateOf(listOf("hiking", "camping", "caving", "mountain biking", "trail running", "snow sports", "atv", "horseback riding"))}
-    var selectedOptions by remember { mutableStateOf(listOf("hiking", "camping", "caving", "mountain biking", "snow sports" ))}
+    var selectedOptions by remember { mutableStateOf(listOf("hiking", "camping", "mountain biking", "snow sports", "webcam" ))}
     //todo, look at changing to bound based off trails.  or both?
     LaunchedEffect(webcamList) {
         if (webCamMarkers.isNotEmpty()) {
@@ -111,26 +106,28 @@ fun MapsScreen(
                 }
             ) {
                 webCamMarkers.forEach { (webcam, position) ->
-                    Marker(
-                        state = rememberMarkerState(position = position),
-                        title = webcam.title,
-                        snippet = "Click for details",
-                        icon = BitmapDescriptorFactory.fromResource(R.drawable.webcam_marker5),
-                        onClick = {
-                            selectedWebCam = webcam
-                            selectedTrail = null // Deselect any trail if a webcam is selected
-                            true
-                        }
-                    )
+                    val activity = "webcam"
+                    val shouldShow = activity.lowercase() in selectedOptions.map{it.lowercase()}
+                    println("DEBUG FILTER:  $selectedOptions - $shouldShow - $activity")
+                    if (shouldShow){
+                        Marker(
+                            state = rememberMarkerState(position = position),
+                            title = webcam.title,
+                            snippet = "Click for details",
+                            icon = BitmapDescriptorFactory.fromResource(R.drawable.webcam_marker3),
+                            onClick = {
+                                selectedWebCam = webcam
+                                selectedTrail = null // Deselect any trail if a webcam is selected
+                                true
+                            }
+                        )
+                    }
                 }
 
                 trailMarkers.forEach { (trail, position) ->
                     val activity = trail.activities.values.firstOrNull()?.activityTypeName
                     // was val shouldShow = activity in selectedOptions but needed to lowercase it to account for variations
                     val shouldShow = activity?.lowercase() in selectedOptions.map { it.lowercase() }
-
-                    println("DEBUG FILTER: $selectedOptions $activity $shouldShow")
-
                     //sets the icon that this marker will used based on the activity of the marker
                     val iconResourceId = when(activity){
                         "hiking" -> R.drawable.hiking
@@ -171,11 +168,11 @@ fun MapsScreen(
             selectedTrail?.let { trail ->
                 TrailInfoPopup(
                     trail = trail,
-                    onDismiss = { selectedTrail = null },
-                    onTrailNameSelected = { placeId ->
-                        val selectedTrailDetail = trailList.firstOrNull { it.placeId == placeId }
-                        selectedTrailDetail?.let { onTrailSelected(it) }
-                    }
+                    onDismiss = { selectedTrail = null }
+//                    onTrailNameSelected = { placeId ->
+//                        val selectedTrailDetail = trailList.firstOrNull { it.placeId == placeId }
+//                        selectedTrailDetail?.let { onTrailSelected(it) }
+//                    }
                 )
             }
 
@@ -184,9 +181,35 @@ fun MapsScreen(
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .padding(bottom = 80.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                Row{
+                    SmallFloatingActionButton(
+                        onClick = { onWebCamListViewClick(webcamList) },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.webcam),
+                            contentDescription = "Opens Webcams List",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    SmallFloatingActionButton(
+                        onClick = { onTrailsListViewClick(trailList) },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.trail),
+                            contentDescription = "Opens Trails List",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+
                 MultiChoiceSegmentedButton(
                     selectedFilters = selectedOptions,
                     onFilterChange = { filter ->
@@ -198,42 +221,6 @@ fun MapsScreen(
                     },
                     modifier = Modifier.width(150.dp),
                 )
-                ExtendedFloatingActionButton(
-                    modifier = Modifier.width(150.dp), // Set a fixed width (adjust as needed)
-                    onClick = { onWebCamListViewClick(webcamList) },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    icon = { }, // Empty icon to prevent default centering
-                    text = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(), // Make Row take full width
-                            horizontalArrangement = Arrangement.Start, // ✅ Left-align content
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Open WebCam List View")
-                            Text("WebCams", modifier = Modifier.padding(start = 8.dp)) // Add spacing
-                        }
-                    }
-                )
-
-                ExtendedFloatingActionButton(
-                    modifier = Modifier.width(150.dp), // Set the same width for both buttons
-                    onClick = { onTrailsListViewClick(trailList) },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    icon = { }, // Empty icon to prevent default centering
-                    text = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start, // ✅ Left-align content
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Open Trails List View")
-                            Text("Trails", modifier = Modifier.padding(start = 8.dp)) // Add spacing
-                        }
-                    }
-                )
-
             }
         }
     }

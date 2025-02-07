@@ -156,7 +156,7 @@ fun LocationInputScreen(
                 modifier = Modifier.fillMaxWidth(), // Make the button full-width
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text("Fetch WebCams") // Button label
+                Text("Fetch Data") // Button label
             }
         }
     }

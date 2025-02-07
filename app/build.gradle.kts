@@ -84,6 +84,10 @@ dependencies {
 
     // NavController
     implementation(libs.androidx.navigation.compose)
+
+    //For pulling in image based on url into popups
+    implementation("io.coil-kt.coil3:coil-compose:3.1.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.1.0")
 }
 
 // Per Google Maps Tutorial

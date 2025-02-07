@@ -26,7 +26,7 @@ fun MultiChoiceSegmentedButton(
 ) {
     // options is used in the when statement below to determine which icon to display
 
-    val options = listOf("hiking", "camping", "caving", "mountain biking","snow sports")
+    val options = listOf("hiking", "camping", "mountain biking","snow sports", "webcam")
 
     MultiChoiceSegmentedButtonRow {
         options.forEach { label ->
@@ -89,6 +89,11 @@ fun MultiChoiceSegmentedButton(
                         "horseback riding" -> Image(
                             painter = painterResource(id = R.drawable.horseback),
                             contentDescription = "Horseback Riding",
+                            modifier = Modifier.size(iconSize)
+                        )
+                        "webcam" -> Image(
+                            painter = painterResource(id = R.drawable.webcam_marker),
+                            contentDescription = "WebCams",
                             modifier = Modifier.size(iconSize)
                         )
                         else -> {}
