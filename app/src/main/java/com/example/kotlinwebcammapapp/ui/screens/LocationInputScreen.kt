@@ -1,5 +1,7 @@
 package com.example.kotlinwebcammapapp.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,6 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
 
 /**
  * Location Input Screen
@@ -24,6 +28,8 @@ fun LocationInputScreen(
     getCoordinates: suspend () -> Coordinates?, // Passed in Function from MainActivity to get user-provided coordinates
     onLocationSubmit: (Double, Double) -> Unit // Function to submit user-provided latitude and longitude
 ) {
+    val context = LocalContext.current // Get the current context
+
     // State variables for latitude and longitude input fields
     var lat by remember { mutableStateOf("") } // User provided latitude as a string
     var lon by remember { mutableStateOf("") } // User provided longitude as a string
@@ -31,6 +37,14 @@ fun LocationInputScreen(
     // State variables  for tracking validation of data
     var isLatError by remember { mutableStateOf(false) } // Flag for invalid latitude input
     var isLonError by remember { mutableStateOf(false) } // Flag for invalid longitude input
+
+    // used to track permission state and allow conditional text on the button
+    var hasLocationPermission by remember {
+        mutableStateOf(
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                    ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        )
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -78,7 +92,11 @@ fun LocationInputScreen(
                     contentColor = MaterialTheme.colorScheme.onSecondary // Use contrast color
                 )
             ) {
-                Text("Use Current Location")
+                Text(if (!hasLocationPermission){
+                    "Grant Location Permissions"
+                }else{
+                    ("Use Current Location")
+                })
             }
 
             // Input field for latitude
