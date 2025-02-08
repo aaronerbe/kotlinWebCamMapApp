@@ -79,15 +79,21 @@ dependencies {
 
     // Per Google Maps Tutorial
     // Maps SDK for Android
-    implementation("com.google.android.gms:play-services-maps:19.0.0")
-    implementation("com.google.maps.android:maps-compose:6.4.1")
+    implementation(libs.playServicesMaps)
+    implementation(libs.maps.compose)
 
     // NavController
     implementation(libs.androidx.navigation.compose)
 
     //For pulling in image based on url into popups
-    implementation("io.coil-kt.coil3:coil-compose:3.1.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.1.0")
+    implementation(libs.coil3.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    //for handling location permissions
+//    implementation("com.google.accompanist:accompanist-permissions:0.37.0")
+
+
+
 }
 
 // Per Google Maps Tutorial

@@ -6,7 +6,7 @@ import kotlinx.coroutines.runBlocking
 
 /**
  * Builds a WebCams object using the given latitude and longitude.
- * This is a blocking operation for simplicity in this learning context.
+ * This is a blocking operation. Meaning it forces i
  * @param lat Latitude for the request
  * @param lon Longitude for the request
  * @return WebCams object containing webcam data
