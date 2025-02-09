@@ -19,7 +19,6 @@ import com.example.kotlinwebcammapapp.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.core.app.ActivityCompat.finishAffinity
 import com.example.kotlinwebcammapapp.ui.components.MultiChoiceSegmentedButton
