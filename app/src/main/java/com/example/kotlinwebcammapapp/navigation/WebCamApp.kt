@@ -15,7 +15,10 @@ import kotlinx.coroutines.*
 
 @Composable
 fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
-    var currentScreen by remember { mutableStateOf<AppState>(AppState.LocationInput) }
+//    var currentScreen by remember { mutableStateOf<AppState>(AppState.LocationInput) }
+    var currentScreen by remember { mutableStateOf<AppState>(AppState.Map(emptyList(), emptyList())) }
+    var isLoading by remember { mutableStateOf(false) }
+
 
     BackHandler {
         when (currentScreen) {
@@ -52,11 +55,64 @@ fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
             trailList = state.trails,
             onWebCamListViewClick = { currentScreen = AppState.WebCamList(state.webcams, state.trails) },
             onTrailsListViewClick = { currentScreen = AppState.TrailList(state.webcams, state.trails) },
-//            onTrailSelected = { selectedTrail -> currentScreen = AppState.TrailDetail(selectedTrail, state.webcams, state.trails) }
+            isLoading = isLoading, // pass the isLoading state to the MapScreen
+            //callback to take the lat, lon that feeds back from Search button in MapScreen and resubmits with new coordinates
+            onSearch = { lat, lon ->
+                isLoading = true //Set loading to true when search starts
+                CoroutineScope(Dispatchers.IO).launch {
+                    val webCamsDeferred = async { buildWebCamData(lat, lon).getWebcams() }
+                    val trailsDeferred = async { buildTrailData(lat, lon).getTrails() }
+
+                    val webCams = webCamsDeferred.await()
+                    val trails = trailsDeferred.await()
+
+                    withContext(Dispatchers.Main) {
+                        // Step 1: Reset the map with an empty state
+                        currentScreen = AppState.Map(emptyList(), emptyList())
+
+                        // Step 2: Delay briefly to force recomposition
+                        // TODO see if this can be removed
+                        // delay(100) // Small delay to force a re-render
+
+                        //Step 2.1:  Stop isLoading screen
+                        isLoading = false
+
+                        // Step 3: Load the new data
+                        currentScreen = AppState.Map(webCams, trails)
+                    }
+                }
+            },
+            onLocationInputClick = { currentScreen = AppState.LocationInput }, // callback to go back to location input screen
+            onUserLocationSearch = {
+                isLoading = true //Set loading to true when search starts
+                CoroutineScope(Dispatchers.IO).launch {
+                    val coordinates = getCoordinates() // Suspend function call
+                    val lat = coordinates?.latitude ?: 0.0
+                    val lon = coordinates?.longitude ?: 0.0
+                    val webCamsDeferred = async { buildWebCamData(lat, lon).getWebcams() }
+                    val trailsDeferred = async { buildTrailData(lat, lon).getTrails() }
+
+                    val webCams = webCamsDeferred.await()
+                    val trails = trailsDeferred.await()
+                    withContext(Dispatchers.Main) {
+                        // Step 1: Reset the map with an empty state
+                        currentScreen = AppState.Map(emptyList(), emptyList())
+
+                        // Step 2: Delay briefly to force recomposition
+                        // TODO see if this can be removed
+                         delay(100) // Small delay to force a re-render
+
+                        //Step 2.1:  Stop isLoading screen
+                        isLoading = false
+
+                        // Step 3: Load the new data
+                        currentScreen = AppState.Map(webCams, trails)
+                    }
+                }
+            }
         )
         is AppState.WebCamList -> WebCamListScreen(
             webcams = state.webcams,
-//            trails = state.trails,
             onWebCamSelected = { webcamId ->
                 state.webcams.firstOrNull { it.webcamId == webcamId }?.let {
                     currentScreen = AppState.WebCamDetail(it, state.webcams, state.trails)
@@ -66,7 +122,6 @@ fun WebCamApp(getCoordinates: suspend () -> Coordinates?) {
         )
         is AppState.TrailList -> TrailListScreen(
             trails = state.trails,
-//            webcams = state.webcams,
             onTrailNameSelected = { placeId ->
                 state.trails.firstOrNull { it.placeId == placeId }?.let {
                     currentScreen = AppState.TrailDetail(it, state.webcams, state.trails)

@@ -39,13 +39,13 @@ fun LocationInputScreen(
     var isLonError by remember { mutableStateOf(false) } // Flag for invalid longitude input
 
     // used to track permission state and allow conditional text on the button
-    var hasLocationPermission by remember {
+    val hasLocationPermission by remember {
         mutableStateOf(
             ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                     ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         )
     }
-
+// TODO Create back button to go back to MapScreen
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
