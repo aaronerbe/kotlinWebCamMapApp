@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +20,7 @@ import androidx.compose.ui.Modifier
 //import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.kotlinwebcammapapp.model.Trail
+import com.example.kotlinwebcammapapp.utils.renderHtmlText
 
 /**
  * Trail Detail Screen
@@ -32,6 +35,8 @@ fun TrailDetailScreen(
     onBack: () -> Unit // Function to handle back navigation
 ) {
 //    val context = LocalContext.current // Provides access to the current context
+    // Extract the activity type from the trail.  Used as part of the path to get the details later
+    val activity = trail.activities.values.firstOrNull()?.activityTypeName
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -42,6 +47,7 @@ fun TrailDetailScreen(
             modifier = Modifier
                 .fillMaxSize() // Fill the available screen space
                 .padding(16.dp) // Add padding around the content
+                .verticalScroll(rememberScrollState())
         ) {
             // Add spacing before the title
             Spacer(modifier = Modifier.height(62.dp))
@@ -56,27 +62,21 @@ fun TrailDetailScreen(
             // Add spacing between title and details
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Display webcam details (title, location)
-            Text(
-                text = "Title: ${trail.name}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground // Use appropriate contrast color
-            )
-            Text(
-                text = "Location: ${trail.city}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = "Description: ${trail.description}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = "Directions: ${trail.directions}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            // Make the name clickable to navigate to details
+            Text(text = trail.name,style = MaterialTheme.typography.titleLarge)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Activity Type: $activity", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Length: ${trail.activities[activity]?.length} miles", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Directions:", style = MaterialTheme.typography.bodyMedium)
+            Text(text = renderHtmlText(trail.directions), style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Trail Description:", style = MaterialTheme.typography.bodyMedium)
+            renderHtmlText(trail.description) // strips out the html tags so it looks nice
+            Text(text = renderHtmlText(trail.description), style = MaterialTheme.typography.bodySmall)
+
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Back button to navigate back to the list screen

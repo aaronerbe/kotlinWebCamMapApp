@@ -1,6 +1,10 @@
 package com.example.kotlinwebcammapapp.navigation
 
+import android.app.Activity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.*
+import androidx.core.app.ActivityCompat.finishAffinity
 import com.example.kotlinwebcammapapp.model.*
 import com.example.kotlinwebcammapapp.ui.screens.LocationInputScreen
 import com.example.kotlinwebcammapapp.ui.screens.MapsScreen
@@ -20,9 +24,33 @@ import kotlinx.coroutines.*
 fun GeoViewerApp(getCoordinates: suspend () -> Coordinates?) {
     // Set the starting screen to the Map screen with an empty list of webcams and trails
     var currentScreen by remember { mutableStateOf<AppState>(AppState.Map(emptyList(), emptyList())) }
-
+    val activityContext = LocalActivity.current as Activity  // Activity needed to close app
     // Track loading state to display a loading spinner when fetching new data
     var isLoading by remember { mutableStateOf(false) }
+
+    // Handle physical back button presses to navigate between screens
+    BackHandler {
+        when (currentScreen) {
+            is AppState.WebCamList -> currentScreen = AppState.Map(
+                (currentScreen as AppState.WebCamList).webcams,
+                (currentScreen as AppState.WebCamList).trails
+            )
+            is AppState.TrailList -> currentScreen = AppState.Map(
+                (currentScreen as AppState.TrailList).webcams,
+                (currentScreen as AppState.TrailList).trails
+            )
+            is AppState.Map -> finishAffinity(activityContext) //currentScreen = AppState.LocationInput
+            is AppState.WebCamDetail -> currentScreen = AppState.WebCamList(
+                (currentScreen as AppState.WebCamDetail).webcamList,
+                (currentScreen as AppState.WebCamDetail).trailList
+            )
+            is AppState.TrailDetail -> currentScreen = AppState.TrailList(
+                (currentScreen as AppState.TrailDetail).webcamList,
+                (currentScreen as AppState.TrailDetail).trailList
+            )
+            is AppState.LocationInput -> currentScreen = AppState.Map(emptyList(), emptyList())
+        }
+    }
 
     // Handle navigation between different screens
     when (val state = currentScreen) {
