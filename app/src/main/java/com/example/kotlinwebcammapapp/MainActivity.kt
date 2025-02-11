@@ -22,7 +22,7 @@ import com.example.kotlinwebcammapapp.ui.theme.KotlinWebCamMapAppTheme
 import kotlin.coroutines.resume  //resume suspended coroutines
 import kotlin.coroutines.suspendCoroutine  //suspend execution till resumed
 // Main App
-import com.example.kotlinwebcammapapp.navigation.WebCamApp
+import com.example.kotlinwebcammapapp.navigation.GeoViewerApp
 
 
 /**
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                  * Set the content of the activity to the WebCamApp composable.
                  * @param {getCoordinates()} Lambda to get the user's location
                  */
-                WebCamApp(getCoordinates = { getCoordinates() })
+                GeoViewerApp(getCoordinates = { getCoordinates() })
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.example.kotlinwebcammapapp.ui.screens
 
-import android.Manifest
-import android.content.pm.PackageManager
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,22 +13,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
+import androidx.compose.ui.res.painterResource
+import com.example.kotlinwebcammapapp.R
 
 /**
  * Location Input Screen
  * Allows the user to input a latitude and longitude.
  * @param getCoordinates Function to get the user's location
  * @param onLocationSubmit Function to submit the latitude and longitude
+ * @param onBack Function to handle back navigation
  */
 @Composable
 fun LocationInputScreen(
     getCoordinates: suspend () -> Coordinates?, // Passed in Function from MainActivity to get user-provided coordinates
-    onLocationSubmit: (Double, Double) -> Unit // Function to submit user-provided latitude and longitude
+    onLocationSubmit: (Double, Double) -> Unit, // Function to submit user-provided latitude and longitude
+    onBack: () -> Unit
 ) {
-    val context = LocalContext.current // Get the current context
-
     // State variables for latitude and longitude input fields
     var lat by remember { mutableStateOf("") } // User provided latitude as a string
     var lon by remember { mutableStateOf("") } // User provided longitude as a string
@@ -38,13 +37,6 @@ fun LocationInputScreen(
     var isLatError by remember { mutableStateOf(false) } // Flag for invalid latitude input
     var isLonError by remember { mutableStateOf(false) } // Flag for invalid longitude input
 
-    // used to track permission state and allow conditional text on the button
-    val hasLocationPermission by remember {
-        mutableStateOf(
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        )
-    }
 // TODO Create back button to go back to MapScreen
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -66,37 +58,18 @@ fun LocationInputScreen(
                 modifier = Modifier.fillMaxWidth() // Make the text fill the available width
                     .padding(bottom = 32.dp) // Add padding below the text
             )
-            // Button to fetch and use the device's current location
-            Button(
-                onClick = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val coordinates = getCoordinates() // Suspend function call
-                        withContext(Dispatchers.Main) {
-                            if (coordinates != null) {
-                                lat = coordinates.latitude.toString()
-                                lon = coordinates.longitude.toString()
-                                println("DEBUG LOCATION INPUT: $lat, $lon")
-                                onLocationSubmit(coordinates.latitude, coordinates.longitude)
-                            } else {
-                                println("DEBUG LOCATION INPUT: Coordinates are null or permissions denied.")
-                            }
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                shape = MaterialTheme.shapes.large, // Use the medium shape from the theme
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary, // Use secondary color for this button
-                    contentColor = MaterialTheme.colorScheme.onSecondary // Use contrast color
-                )
-            ) {
-                Text(if (!hasLocationPermission){
-                    "Grant Location Permissions"
-                }else{
-                    ("Use Current Location")
-                })
+
+            Row () {
+                Spacer(modifier = Modifier.weight(1f)) // Fills available space
+
+                // Back button
+                Button(
+                    onClick = onBack,
+    //                modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text("Back to Map")
+                }
             }
 
             // Input field for latitude
@@ -110,7 +83,6 @@ fun LocationInputScreen(
                 isError = isLatError, // Highlight the field if there's an error
                 modifier = Modifier.fillMaxWidth(), // Make the input field full-width
                 shape = MaterialTheme.shapes.small // Small rounded corners
-
             )
             // Show an error message if the latitude is invalid
             if (isLatError) {
@@ -146,35 +118,67 @@ fun LocationInputScreen(
 
             Spacer(modifier = Modifier.height(16.dp)) // Add spacing between fields
 
-            // Button to submit the latitude and longitude
-            Button(
-                onClick = {
-                    val latValue = lat.toDoubleOrNull() // Convert latitude to Double
-                    val lonValue = lon.toDoubleOrNull() // Convert longitude to Double
+            Row ()
+            {
+                Spacer(modifier = Modifier.weight(1f)) // Fills available space
 
-                    // Validate the latitude value
-                    if (latValue == null || latValue !in -90.0..90.0) {
-                        isLatError = true
-                    }
+                // Button to submit the latitude and longitude
+                Button(
+                    onClick = {
+                        val latValue = lat.toDoubleOrNull() // Convert latitude to Double
+                        val lonValue = lon.toDoubleOrNull() // Convert longitude to Double
 
-                    // Validate the longitude value
-                    if (lonValue == null || lonValue !in -180.0..180.0) {
-                        isLonError = true
-                    }
+                        // Validate the latitude value
+                        if (latValue == null || latValue !in -90.0..90.0) {
+                            isLatError = true
+                        }
 
-                    // Submit the values if both are valid
-                    if (!isLatError && !isLonError && latValue != null && lonValue != null) {
-                        onLocationSubmit(latValue, lonValue)
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary, // Use primary color
-                    contentColor = MaterialTheme.colorScheme.onPrimary // Use onPrimary for contrast
-                ),
-                modifier = Modifier.fillMaxWidth(), // Make the button full-width
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text("Fetch Data") // Button label
+                        // Validate the longitude value
+                        if (lonValue == null || lonValue !in -180.0..180.0) {
+                            isLonError = true
+                        }
+
+                        // Submit the values if both are valid
+                        if (!isLatError && !isLonError && latValue != null && lonValue != null) {
+                            onLocationSubmit(latValue, lonValue)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary, // Use primary color
+                        contentColor = MaterialTheme.colorScheme.onPrimary // Use onPrimary for contrast
+                    ),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text("Fetch Data") // Button label
+                }
+
+                // Button 1 (Row 1, Column 1) - Webcam List
+                SmallFloatingActionButton(
+                    onClick = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val coordinates = getCoordinates() // Suspend function call
+                            withContext(Dispatchers.Main) {
+                                if (coordinates != null) {
+                                    lat = coordinates.latitude.toString()
+                                    lon = coordinates.longitude.toString()
+                                    println("DEBUG LOCATION INPUT: $lat, $lon")
+                                    onLocationSubmit(coordinates.latitude, coordinates.longitude)
+                                } else {
+                                    println("DEBUG LOCATION INPUT: Coordinates are null or permissions denied.")
+                                }
+                            }
+                        }
+                    },
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.location_white),
+                        contentDescription = "Use Current Location",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
             }
         }
     }

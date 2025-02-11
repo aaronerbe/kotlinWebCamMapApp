@@ -1,7 +1,7 @@
 package com.example.kotlinwebcammapapp.ui.screens
 
-import android.content.Intent
-import android.net.Uri
+//import android.content.Intent
+//import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+//import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.kotlinwebcammapapp.model.Trail
 
@@ -31,7 +31,7 @@ fun TrailDetailScreen(
     trail: Trail, // Webcam details to display
     onBack: () -> Unit // Function to handle back navigation
 ) {
-    val context = LocalContext.current // Provides access to the current context
+//    val context = LocalContext.current // Provides access to the current context
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -81,40 +81,22 @@ fun TrailDetailScreen(
             // Add spacing between details and URLs
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Button to open the Windy URL
-            Button(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(trail.activities["hiking"]?.url))
-                    context.startActivity(intent) // Open the URL in a browser
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium, // Apply consistent rounded corners
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary, // Use secondary color for this button
-                    contentColor = MaterialTheme.colorScheme.onSecondary // Use contrast color
-                )
-            ) {
-                Text("Trail URL")
-            }
-
-            // Add spacing between buttons
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Button to open the provider URL
-            Button(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(trail.activities["hiking"]?.url))
-                    context.startActivity(intent) // Open the URL in a browser
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                )
-            ) {
-                Text("Trail URL")
-            }
+            //REMOVING.  Links provided by API are broken (domain issue)
+            // Button to open the URL
+//            Button(
+//                onClick = {
+//                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(trail.activities["hiking"]?.url))
+//                    context.startActivity(intent) // Open the URL in a browser
+//                },
+//                modifier = Modifier.fillMaxWidth(),
+//                shape = MaterialTheme.shapes.medium,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = MaterialTheme.colorScheme.secondary,
+//                    contentColor = MaterialTheme.colorScheme.onSecondary
+//                )
+//            ) {
+//                Text("Trail URL")
+//            }
 
             // Add spacing between URL buttons and the back button
             Spacer(modifier = Modifier.height(16.dp))
@@ -134,3 +116,5 @@ fun TrailDetailScreen(
         }
     }
 }
+
+//TODO add more details

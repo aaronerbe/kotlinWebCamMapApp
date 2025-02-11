@@ -21,6 +21,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.kotlinwebcammapapp.model.Trail
 
+/**
+ * Trail List Screen
+ * @param trails List of trails to display
+ * @param onTrailNameSelected Callback to handle when a trail name is selected.  Sends to TrailDetailScreen
+ * @param onBack Callback to handle back navigation
+ */
 @Composable
 fun TrailListScreen(
     trails: List<Trail>,
@@ -60,6 +66,7 @@ fun TrailListScreen(
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
+                // Display each trail in the list
                 trails.forEach { trail ->
                     Box(
                         modifier = Modifier
