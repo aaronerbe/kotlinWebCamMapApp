@@ -4,6 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
+/**
+ * Trail Response Model
+ * Uses Serialize to convert JSON to Kotlin objects
+ */
+
 @Serializable
 data class TrailResponse(
     val trails: Map<String, Trail>? = null // A map where keys are trail IDs and values are Trail objects

@@ -1,6 +1,5 @@
 package com.example.kotlinwebcammapapp.data
 
-// Import necessary libraries
 import com.example.kotlinwebcammapapp.model.WebCam
 import com.example.kotlinwebcammapapp.model.WebCamResponse
 

@@ -14,11 +14,11 @@ import kotlinx.serialization.json.Json
 import com.example.kotlinwebcammapapp.BuildConfig
 
 /**
- * Handles API requests for fetching webcam data from the Windy API.
+ * WebCam API class for managing webcam data.  Handles API requests for fetching webcam data from the Windy API.
  * Object to handle the WebCam API
  */
 object WebCamAPI {
-    // API key for WEBCAMS
+    // API key for WEBCAMS.  obscured using secret
     private const val APIKEY = BuildConfig.webcamApiKey
 
     // JSON configuration for parsing API responses
@@ -35,15 +35,17 @@ object WebCamAPI {
      * @return WebCamResponse? (Null if API call fails)
      */
     suspend fun fetchWebCamData(lat: Double, lon: Double): WebCamResponse? {
-        val url = buildBaseURL(lat, lon)
+        val url = buildBaseURL(lat, lon)  // build the url for the api
         println("DEBUG API URL: $url")
 
+        // create the HTTP client using the CIO engine
         val client = HttpClient(CIO) {
             install(ContentNegotiation) {
                 json(json)
             }
         }
 
+        // make an HTTP GET request to the specified URL.  capture it as response
         return try {
             val response: HttpResponse = client.get(url) {
                 expectSuccess = true
@@ -54,8 +56,8 @@ object WebCamAPI {
             }
 
             if (response.status.value in 200..299) {
-                val responseBody = response.bodyAsText()
-                json.decodeFromString<WebCamResponse>(responseBody)
+                val responseBody = response.bodyAsText() // read the response body as text
+                json.decodeFromString<WebCamResponse>(responseBody) // parse the response body into a WebCamResponse object
             } else {
                 println("DEBUG API Error: ${response.status}")
                 null
@@ -64,7 +66,7 @@ object WebCamAPI {
             println("DEBUG API Exception: ${e.message}")
             null
         } finally {
-            client.close()
+            client.close()  // close the client
         }
     }
 

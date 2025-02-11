@@ -17,9 +17,14 @@ import com.example.kotlinwebcammapapp.R
 import com.example.kotlinwebcammapapp.model.WebCam
 import coil3.compose.AsyncImage
 
-
+/**
+ * WebCam Info Popup Detail
+ * @param webcam The webcam to display details for
+ * @param onDismiss Function to dismiss the popup
+ */
 @Composable
 fun WebCamInfoPopup(webcam: WebCam, onDismiss: () -> Unit) {
+    // capture the context
     val context = LocalContext.current
 
     Box(
@@ -38,6 +43,7 @@ fun WebCamInfoPopup(webcam: WebCam, onDismiss: () -> Unit) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
+                // Display the title and details
                 Text(text = webcam.title, style = MaterialTheme.typography.titleSmall)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Views: ${webcam.viewCount}", style = MaterialTheme.typography.bodySmall)
@@ -45,12 +51,14 @@ fun WebCamInfoPopup(webcam: WebCam, onDismiss: () -> Unit) {
                 Text(text = "Status: ${webcam.status}", style = MaterialTheme.typography.bodySmall)
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // capture the url to the webcam daytime preview
                 val imageUrl = webcam.images.daylight.preview
 
+                // Display the image using AsyncImage addon.
                 AsyncImage(
                     model = imageUrl,
                     contentDescription = null,
-                    error = painterResource(id = R.drawable.default_image),
+                    error = painterResource(id = R.drawable.default_image), // default image if it fails for some reason
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp),

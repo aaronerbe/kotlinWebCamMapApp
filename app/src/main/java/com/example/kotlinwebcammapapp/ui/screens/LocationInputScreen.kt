@@ -37,7 +37,6 @@ fun LocationInputScreen(
     var isLatError by remember { mutableStateOf(false) } // Flag for invalid latitude input
     var isLonError by remember { mutableStateOf(false) } // Flag for invalid longitude input
 
-// TODO Create back button to go back to MapScreen
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background

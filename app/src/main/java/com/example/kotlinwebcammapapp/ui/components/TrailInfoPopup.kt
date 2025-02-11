@@ -19,13 +19,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.kotlinwebcammapapp.model.Trail
 
+/**
+ * Trail Info Popup Detail
+ * @param trail The trail to display details for
+ * @param onDismiss Function to dismiss the popup
+ */
 @Composable
 fun TrailInfoPopup(
     trail: Trail,
     onDismiss: () -> Unit,
-    //Removing this.  Not adding any value as details are in popup already and the links the API provides are dead.
-//    onTrailNameSelected: (Long) -> Unit // Ensure this is correctly passed from the parent
 ) {
+    // Extract the activity type from the trail.  Used as part of the path to get the details later
     val activity = trail.activities.values.firstOrNull()?.activityTypeName
 
     Box(
@@ -48,10 +52,6 @@ fun TrailInfoPopup(
                 Text(
                     text = "Trail Name: ${trail.name}",
                     style = MaterialTheme.typography.titleSmall,
-                    //removing this.  adds no value.
-//                    modifier = Modifier.clickable {
-//                        onTrailNameSelected(trail.placeId) // Trigger state change
-//                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Activity Type: $activity", style = MaterialTheme.typography.bodySmall)
@@ -61,19 +61,6 @@ fun TrailInfoPopup(
                 Text(text = "Trail Description: ${trail.description}", style = MaterialTheme.typography.bodySmall)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Directions: ${trail.directions}", style = MaterialTheme.typography.bodySmall)
-
-                //had to remove the images cause the API data has too many bad links to images.
-//                Spacer(modifier = Modifier.height(8.dp))
-//                val activity = trail.activities.values.firstOrNull()?.activityTypeName
-//                val imageUrl = trail.activities[activity]?.thumbnail
-//                println("DEBUG IMAGE URL: $imageUrl")
-//                AsyncImage(
-//                    model = imageUrl,
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(200.dp),
-//                )
             }
         }
     }

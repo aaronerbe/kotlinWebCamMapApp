@@ -21,10 +21,8 @@ import com.example.kotlinwebcammapapp.R
 fun MultiChoiceSegmentedButton(
     selectedFilters: List<String>,
     onFilterChange: (String) -> Unit,
-//    modifier: Modifier = Modifier
 ) {
     // options is used in the when statement below to determine which icon to display
-
     val options = listOf("hiking", "camping", "mountain biking","snow sports", "webcam")
 
     MultiChoiceSegmentedButtonRow {
@@ -41,6 +39,7 @@ fun MultiChoiceSegmentedButton(
                 onCheckedChange = { onFilterChange(label) },
                 //can remove the .Icon(isSelected) portion to remove checkmarks if I want
                 icon = { SegmentedButtonDefaults.Icon(isSelected) },
+
                 //change background color to grey when it's selected
                 colors = SegmentedButtonDefaults.colors(
                     activeContainerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,

@@ -77,28 +77,6 @@ fun TrailDetailScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-
-            // Add spacing between details and URLs
-            Spacer(modifier = Modifier.height(16.dp))
-
-            //REMOVING.  Links provided by API are broken (domain issue)
-            // Button to open the URL
-//            Button(
-//                onClick = {
-//                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(trail.activities["hiking"]?.url))
-//                    context.startActivity(intent) // Open the URL in a browser
-//                },
-//                modifier = Modifier.fillMaxWidth(),
-//                shape = MaterialTheme.shapes.medium,
-//                colors = ButtonDefaults.buttonColors(
-//                    containerColor = MaterialTheme.colorScheme.secondary,
-//                    contentColor = MaterialTheme.colorScheme.onSecondary
-//                )
-//            ) {
-//                Text("Trail URL")
-//            }
-
-            // Add spacing between URL buttons and the back button
             Spacer(modifier = Modifier.height(16.dp))
 
             // Back button to navigate back to the list screen
@@ -116,5 +94,3 @@ fun TrailDetailScreen(
         }
     }
 }
-
-//TODO add more details

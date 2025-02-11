@@ -54,9 +54,20 @@ fun GeoViewerApp(getCoordinates: suspend () -> Coordinates?) {
             isLoading = isLoading, // Pass loading state to the map screen
 
             // Search for webcams and trails at the new map center
-            onSearch = { lat, lon ->
+            // getUserLocation Boolean is sent in to key the function to get device location rather than use the lat/lon thats passed in.
+            onSearch = {latitude: Double, longitude: Double, getUserLocation: Boolean ->
                 isLoading = true // Show loading spinner while fetching data
                 CoroutineScope(Dispatchers.IO).launch {
+                    var lat = latitude
+                    var lon = longitude
+                    println("DEBUG SEARCH:  lat: $lat, lon: $lon, $getUserLocation, $getCoordinates")
+                    if (getUserLocation) { // if true, means we need to fetch device location, else use the lat, lon fed to us
+                        println("DEBUG SEARCH:  entering if statement (getUserLocation)=true")
+                        val coordinates = getCoordinates() // Fetch current location
+                        lat = coordinates?.latitude ?: 39.8283 // get lat/lon, if none, use default which is center of USA
+                        lon = coordinates?.longitude ?: -98.5795
+                        println("DEBUG SEARCH:  lat: $lat, lon: $lon")
+                    }
                     val webCamsDeferred = async { buildWebCamData(lat, lon).getWebcams() }
                     val trailsDeferred = async { buildTrailData(lat, lon).getTrails() }
 
@@ -81,37 +92,7 @@ fun GeoViewerApp(getCoordinates: suspend () -> Coordinates?) {
             },
 
             // Navigate to the location input screen
-            onLocationInputClick = { currentScreen = AppState.LocationInput },
-
-            // Search for webcams and trails based on the user's current location
-            onUserLocationSearch = {
-                isLoading = true // Show loading spinner while fetching data
-                CoroutineScope(Dispatchers.IO).launch {
-                    val coordinates = getCoordinates() // Fetch current location
-                    val lat = coordinates?.latitude ?: 0.0
-                    val lon = coordinates?.longitude ?: 0.0
-                    val webCamsDeferred = async { buildWebCamData(lat, lon).getWebcams() }
-                    val trailsDeferred = async { buildTrailData(lat, lon).getTrails() }
-
-                    val webCams = webCamsDeferred.await()
-                    val trails = trailsDeferred.await()
-
-                    withContext(Dispatchers.Main) {
-                        // Step 1: Clear the current map data
-                        currentScreen = AppState.Map(emptyList(), emptyList())
-
-                        // Step 2: Small delay to ensure recomposition
-                        // TODO: See if this can be removed
-                        // delay(100) // Small delay to force re-render
-
-                        // Step 3: Stop loading spinner
-                        isLoading = false
-
-                        // Step 4: Load the new data into the map
-                        currentScreen = AppState.Map(webCams, trails)
-                    }
-                }
-            }
+            onLocationInputClick = { currentScreen = AppState.LocationInput }
         )
 
         // Screen displaying a list of webcams

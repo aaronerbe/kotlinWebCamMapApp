@@ -15,10 +15,11 @@ import com.example.kotlinwebcammapapp.BuildConfig
 import com.example.kotlinwebcammapapp.model.Trail
 
 /**
- * Handles API requests for fetching webcam data from the prescriptiontrails.org API.
+ * Trails API class for managing trail data.  Handles API requests for fetching webcam data from the prescriptiontrails.org API.
  * Object to handle the Trail API
  */
 object TrailsAPI {
+    // API key for TRAILS obscured using secret addon
     private const val APIKEY = BuildConfig.trailApiKey
 
     // JSON configuration for parsing API responses
@@ -35,15 +36,17 @@ object TrailsAPI {
      * @return TrailResponse? (Null if API call fails)
      */
     suspend fun fetchTrailData(lat: Double, lon: Double): TrailResponse? {
-        val url = buildBaseURL(lat, lon)
+        val url = buildBaseURL(lat, lon) // build the URL
         println("DEBUG TRAIL API URL: $url")
 
+        // Create an HTTP client using the CIO engine
         val client = HttpClient(CIO) {
             install(ContentNegotiation) {
                 json(json)
             }
         }
 
+        // Make an HTTP GET request to the specified URL.  capture it as response
         return try {
             val response: HttpResponse = client.get(url) {
                 expectSuccess = true
@@ -54,11 +57,10 @@ object TrailsAPI {
             }
 
             if (response.status.value in 200..299) {
-                val responseBody = response.bodyAsText()
+                val responseBody = response.bodyAsText() // read the response body as text
                 println("DEBUG TRAIL API Response: $responseBody")
-                val trailsMap: Map<String, Trail> = json.decodeFromString(responseBody)
-                TrailResponse(trailsMap)
-//                json.decodeFromString<TrailResponse>(responseBody)
+                val trailsMap: Map<String, Trail> = json.decodeFromString(responseBody) // parse the response body into a map of trails
+                TrailResponse(trailsMap) // return the map as a TrailResponse object using the TrailResponse model
             } else {
                 println("DEBUG TRAIL API Error: ${response.status}")
                 null
@@ -67,7 +69,7 @@ object TrailsAPI {
             println("DEBUG TRAIL API Exception: ${e.message}")
             null
         } finally {
-            client.close()
+            client.close() // close the client
         }
     }
 
@@ -82,6 +84,5 @@ object TrailsAPI {
         return "https://trailapi-trailapi.p.rapidapi.com/activity/?lat=${lat}&limit=40&lon=${lon}&radius=50"
     }
 }
-
 
 //    return "https://trailapi-trailapi.p.rapidapi.com/activity/?lat=${lat}&limit=25&lon=${lon}&radius=25&q-activities_activity_type_name_eq=${activity}"

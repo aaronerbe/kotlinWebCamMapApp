@@ -26,14 +26,14 @@ sealed class AppState {
 
     data class WebCamDetail(
         val webcam: WebCam,
-        val webcamList: List<WebCam>,  //  Fix name to match expected references
-        val trailList: List<Trail>     //  Fix name to match expected references
+        val webcamList: List<WebCam>,
+        val trailList: List<Trail>
     ) : AppState()
 
     data class TrailDetail(
         val trail: Trail,
-        val webcamList: List<WebCam>,  //  Fix name to match expected references
-        val trailList: List<Trail>     //  Fix name to match expected references
+        val webcamList: List<WebCam>,
+        val trailList: List<Trail>
     ) : AppState()
 
 }

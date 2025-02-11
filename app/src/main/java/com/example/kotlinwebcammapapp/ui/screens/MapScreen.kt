@@ -43,9 +43,8 @@ import com.example.kotlinwebcammapapp.ui.components.MultiChoiceSegmentedButton
  *  @param onTrailsListViewClick Callback to handle opening TrailListScreen.  Function lives in GeoViewerApp (navigation)
  *      onTrailsListViewClick:  simply changes screen to TrailListScreen and saves the webcam and trail states
  *  @param isLoading:  isLoading state passed in from WebCamApp to track when new searches happen and used to give spinner till it's loaded
- *  @param onSearch:  Callback to handle searching from within Map (Search This Area).  Grabs lat/lon from center of map and passes to GeoViewerApp which resubmits to MapScreen (new) with new coordinates
+ *  @param onSearch:  Callback to handle searching from within Map (Search This Area).  Grabs lat/lon from center of map and passes to GeoViewerApp which resubmits to MapScreen (new) with new coordinates.
  *  @param onLocationInputClick:  Callback to navigate to the LocationInputScreen.  Function lives in GeoViewerApp (navigation).  Simply calls LocationInputScreen
- *  @param onUserLocationSearch:  Callback to handle searching from within Map (Search by User Location).  Grabs lat/lon from center of map and passes to GeoViewerApp which resubmits to MapScreen (new) with new coordinates
  *
  */
 @Composable
@@ -55,9 +54,9 @@ fun MapsScreen(
     onWebCamListViewClick: (List<WebCam>) -> Unit, // Callback to handle opening WebCamListScreen.  Function lives in GeoViewerApp (navigation)
     onTrailsListViewClick: (List<Trail>) -> Unit, // Callback to handle opening TrailListScreen.  Function lives in GeoViewerApp (navigation)
     isLoading: Boolean, // isLoading state passed in from WebCamApp to track when new searches happen and used to give spinner till it's loaded
-    onSearch: (Double, Double) -> Unit, // Callback to handle searching from within Map
+    onSearch: (Double, Double, Boolean) -> Unit, // Callback to handle searching from within Map
     onLocationInputClick: () -> Unit, // Callback to navigate to the LocationInputScreen
-    onUserLocationSearch: () -> Unit // Callback to handle searching from within Map
+//    onUserLocationSearch: () -> Unit // Callback to handle searching from within Map
 ) {
     val context = LocalActivity.current as Activity  // Activity needed to close app
     val cameraPositionState = rememberCameraPositionState() // Map Camera position
@@ -173,11 +172,11 @@ fun MapsScreen(
 
                         // Button 4 (Row 2, Column 2) - Search This Area
                         Button(
-                            onClick = {  // Callback to handle searching from within Map  TODO:  combine this w/ onUserLocationSearch
+                            onClick = {  // Callback to handle searching from within Map
                                 val centerCoordinates = cameraPositionState.position.target
                                 lat = centerCoordinates.latitude
                                 lon = centerCoordinates.longitude
-                                onSearch(lat, lon)
+                                onSearch(lat, lon, false)
                             },
                             modifier = Modifier.width(200.dp)
                         ) {
@@ -204,7 +203,7 @@ fun MapsScreen(
                         }
                         // Button 5 (Row 2, Column 3) - Search by User Location
                         SmallFloatingActionButton(
-                            onClick = { onUserLocationSearch() },  // Callback to handle searching by device location TODO:  combine with onSearch
+                            onClick = { onSearch(lat, lon, true) },  // Callback to handle searching.  true means it will trigger it to grab device location
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ) {
@@ -326,4 +325,3 @@ fun MapsScreen(
 }
 
 //TODO disable trail filter buttons that don't have any activities already
-//TODO  combine the search functions (search by user location just grab the location, then feed to same function as onSearch)
