@@ -26,7 +26,7 @@ This is Stage 3 of the progress.  I have refactored the app to now utilize a Goo
 - On the bottom bar there are 5 filters to help filter visible data on the map.  Each trail type has a unique marker which is associated with the filter button.  Webcams all share the same icon - also associated with a filter button.
 - A close button is given to close the app directly from within the Map.  
 
-[Software Demo Video](http://youtube.link.goes.here)
+[Software Demo Video](https://youtu.be/WPJJOH2JrpI)
 
 # Development Environment
 
